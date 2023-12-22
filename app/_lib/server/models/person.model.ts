@@ -4,10 +4,10 @@ import type { MembershipDocument } from './membership.model'
 
 export interface PersonInput {
   nickname: string
-  firstName: string
-  lastName?: string
   email: string
   birthdate: Date
+  firstName?: string
+  lastName?: string
   location?: string
 }
 
@@ -23,8 +23,9 @@ export interface PersonDocument extends Document, PersonInput {
 const PersonSchema = new Schema<PersonDocument>(
   {
     nickname: { type: String, required: [true, 'Nickname is required.'] },
-    firstName: { type: String, required: [true, 'First name is required.'] },
+    firstName: { type: String },
     lastName: { type: String },
+    location: { type: String },
     hash: { type: String, required: [true, 'Password hash is required.'] },
     email: {
       type: String,
