@@ -5,7 +5,7 @@ import type { MembershipDocument } from './membership.model'
 export interface PersonInput {
   nickname: string
   email: string
-  birthdate: Date
+  birthdate: string
   firstName?: string
   lastName?: string
   location?: string
@@ -46,8 +46,16 @@ const PersonSchema = new Schema<PersonDocument>(
       default: false,
     },
     birthdate: {
-      type: Date,
+      type: String,
       required: [true, 'Birthdate is required.'],
+      validate: {
+        validator(v: string) {
+          return /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)((-(\d{2}):(\d{2})|Z)?)$/.test(
+            v,
+          )
+        },
+        message: 'Please enter a valid email.',
+      },
     },
     memberships: [
       {
