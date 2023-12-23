@@ -39,7 +39,7 @@ const MembershipSchema = new Schema<MembershipDocument>(
  * Membership Model
  * @alpha
  * ----
- * Memberships are a way to associate a Person with a Community.
+ * A membership belongs to a person and associates them with a community
  *
  */
 export const Membership = model<MembershipDocument>(
