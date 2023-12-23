@@ -1,5 +1,5 @@
 import type { Document } from 'mongoose'
-import { Schema, model } from 'mongoose'
+import mongoose, { Schema, model } from 'mongoose'
 import type { PersonDocument } from './person.model'
 import type { CommunityDocument } from './community.model'
 
@@ -42,7 +42,6 @@ const MembershipSchema = new Schema<MembershipDocument>(
  * A membership belongs to a person and associates them with a community
  *
  */
-export const Membership = model<MembershipDocument>(
-  'Membership',
-  MembershipSchema,
-)
+export const Membership =
+  mongoose.models.Membership ||
+  model<MembershipDocument>('Membership', MembershipSchema)

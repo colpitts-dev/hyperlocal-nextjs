@@ -29,7 +29,9 @@
       }
     ],
     "paths": {
-      "@hyperlocal/*": ["./app/*"]
+      "@hyperlocal/*": ["./app/*"],
+      "@hyperlocal/models/*": ["./app/_lib/server/models/*"],
+      "@hyperlocal/services/*": ["./app/_lib/server/services/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

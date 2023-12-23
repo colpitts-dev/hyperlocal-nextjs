@@ -1,5 +1,5 @@
 import type { Document } from 'mongoose'
-import { model, Schema } from 'mongoose'
+import mongoose, { model, Schema } from 'mongoose'
 import type { MembershipDocument } from './membership.model'
 
 export interface CommunityInput {
@@ -55,4 +55,6 @@ const CommunitySchema = new Schema<CommunityDocument>(
  * A Community is a group of people who share a common interest.
  *
  */
-export const Community = model<CommunityDocument>('Community', CommunitySchema)
+export const Community =
+  mongoose.models.Community ||
+  model<CommunityDocument>('Community', CommunitySchema)
