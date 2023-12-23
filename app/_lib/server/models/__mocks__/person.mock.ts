@@ -14,5 +14,6 @@ export const mockPerson = () => {
     hash,
     email: faker.internet.email({ firstName, lastName }),
     birthdate: faker.date.past({ years: 21 }).toISOString(),
+    password: 'Password123!',
   }
 }

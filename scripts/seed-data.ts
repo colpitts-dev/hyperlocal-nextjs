@@ -1,12 +1,8 @@
 import mongoose, { connect } from 'mongoose'
 import dotenv from 'dotenv'
 import { faker } from '@faker-js/faker'
-import {
-  Person,
-  mockPerson,
-  Community,
-  Membership,
-} from '../app/_lib/server/models'
+import { Person, Community, Membership } from '../app/_lib/server/models'
+import { mockPerson } from '../app/_lib/server/models/__mocks__/person.mock'
 
 dotenv.config()
 

@@ -1,10 +1,11 @@
+import mongoose, { Schema, model } from 'mongoose'
 import type { Document } from 'mongoose'
-import { Schema, model } from 'mongoose'
 import type { MembershipDocument } from './membership.model'
 
 export interface PersonInput {
   nickname: string
   email: string
+  password: string
   birthdate: string
   firstName?: string
   lastName?: string
@@ -54,7 +55,7 @@ const PersonSchema = new Schema<PersonDocument>(
             v,
           )
         },
-        message: 'Please enter a valid email.',
+        message: 'Please enter a valid birthdate.',
       },
     },
     memberships: [
@@ -90,4 +91,5 @@ const PersonSchema = new Schema<PersonDocument>(
  * A person belongs to many communities through their memberships.
  *
  */
-export const Person = model<PersonDocument>('Person', PersonSchema)
+export const Person =
+  mongoose.models.Person || model<PersonDocument>('Person', PersonSchema)
