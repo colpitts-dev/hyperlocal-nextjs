@@ -8,7 +8,7 @@ export default function AdminPeople() {
   const [isLoading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/v1/people')
+    fetch('/api/v1/memberships')
       .then(res => res.json())
       .then(data => {
         setData(data)
@@ -25,7 +25,7 @@ export default function AdminPeople() {
   if (!data)
     return (
       <main className="flex min-h-screen flex-col justify-center items-center p-4">
-        <p>No people data</p>
+        <p>No membership data</p>
       </main>
     )
   return (
@@ -34,7 +34,7 @@ export default function AdminPeople() {
         <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           Hyperlocal&nbsp;
           <code className="font-mono font-bold">
-            <Link href={'/admin'}>Admin</Link> &gt; People
+            <Link href={'/admin'}>Admin</Link> &gt; Memberships
           </code>
         </p>
         <div className="p-8 lg:p-0 fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
@@ -47,28 +47,28 @@ export default function AdminPeople() {
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
         {data.map(
-          (person: {
-            firstName: string
-            lastName: string
+          (membership: {
             id: string
-            nickname: string
-            email: string
+            title: string
+            owner: any
+            community: any
           }) => (
             <div
-              key={person.id}
+              key={membership.id}
+              data-testid={membership.id}
               className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
             >
               <h2 className={`mb-3 text-2xl font-semibold`}>
-                {person.nickname}{' '}
+                {membership.owner?.nickname}
                 <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
                   -&gt;
                 </span>
               </h2>
               <p className={`m-0 max-w-[30ch] text-sm opacity-75`}>
-                {person.firstName} {person.lastName}
+                {membership.owner?.firstName} {membership.owner?.lastName}
               </p>
               <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-                {person.email}
+                {membership.community?.title}
               </p>
             </div>
           ),

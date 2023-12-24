@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { Person } from './models'
+import { Person, Community, Membership } from './models'
 
 const MONGO_URI =
   process.env.NODE_ENV === 'test' && process.env.MONGO_TEST_URI
@@ -12,12 +12,16 @@ mongoose
     autoCreate: true,
   })
   .then(() => {
-    console.log(`💾 [hyperlocal-api]: MongoDB successfully connected`)
+    process.env.NODE_ENV !== 'test' &&
+      console.log(`💾 [hyperlocal-api]: MongoDB successfully connected`)
   })
   .catch(err => {
-    console.log(`🚫 [hyperlocal-api]: MongoDB connect error`)
+    process.env.NODE_ENV !== 'test' &&
+      console.log(`🚫 [hyperlocal-api]: MongoDB connect error`)
   })
 
 export const db = {
   Person,
+  Community,
+  Membership,
 }
