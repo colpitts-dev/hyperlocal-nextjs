@@ -30,6 +30,7 @@
     ],
     "paths": {
       "@hyperlocal/*": ["./app/*"],
+      "@hyperlocal/models": ["./app/_lib/server/models"],
       "@hyperlocal/models/*": ["./app/_lib/server/models/*"],
       "@hyperlocal/services/*": ["./app/_lib/server/services/*"]
     }

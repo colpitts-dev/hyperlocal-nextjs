@@ -56,7 +56,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of pet to return
+          description: ID of person to return
           required: true
           schema:
             type: integer
@@ -91,6 +91,148 @@ paths:
         - name: id
           in: path
           description: ID of pet to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+  /communities:
+    post:
+      tags:
+        - community
+      summary: Create a new community
+      description: Create a new community in hyperlocal
+      operationId: createCommunity
+      responses:
+        '200':
+          description: Successful operation
+    get:
+      tags:
+        - community
+      summary: Get all communities
+      description: Get all communities in hyperlocal
+      operationId: getCommunities
+      responses:
+        '200':
+          description: Successful operation
+  /communities/{id}:
+    get:
+      tags:
+        - community
+      summary: Get a community
+      description: Get a community by id
+      operationId: getCommunity
+      parameters:
+        - name: id
+          in: path
+          description: ID of community to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+    patch:
+      tags:
+        - community
+      summary: Update a community
+      description: Update a community by id
+      operationId: updateCommunity
+      parameters:
+        - name: id
+          in: path
+          description: ID of community to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+    delete:
+      tags:
+        - community
+      summary: Delete a community
+      description: Delete a community by id
+      operationId: deleteCommunity
+      parameters:
+        - name: id
+          in: path
+          description: ID of community to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+  /memberships:
+    post:
+      tags:
+        - membership
+      summary: Create a new membership
+      description: Create a new membership in hyperlocal
+      operationId: createMembership
+      responses:
+        '200':
+          description: Successful operation
+    get:
+      tags:
+        - membership
+      summary: Get all memberships
+      description: Get all memberships in hyperlocal
+      operationId: getMemberships
+      responses:
+        '200':
+          description: Successful operation
+  /memberships/{id}:
+    get:
+      tags:
+        - membership
+      summary: Get a membership
+      description: Get a membership by id
+      operationId: getMembership
+      parameters:
+        - name: id
+          in: path
+          description: ID of membership to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+    patch:
+      tags:
+        - membership
+      summary: Update a membership
+      description: Update a membership by id
+      operationId: updateMembership
+      parameters:
+        - name: id
+          in: path
+          description: ID of membership to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+    delete:
+      tags:
+        - membership
+      summary: Delete a membership
+      description: Delete a membership by id
+      operationId: deleteMembership
+      parameters:
+        - name: id
+          in: path
+          description: ID of membership to return
           required: true
           schema:
             type: integer
