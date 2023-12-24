@@ -32,6 +32,13 @@ const MembershipSchema = new Schema<MembershipDocument>(
   },
   {
     timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret) => {
+        delete ret._id
+      },
+    },
   },
 )
 

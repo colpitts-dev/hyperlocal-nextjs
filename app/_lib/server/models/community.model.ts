@@ -44,7 +44,14 @@ const CommunitySchema = new Schema<CommunityDocument>(
     theme: Object,
   },
   {
-    timestamps: true, // to create updatedAt and createdAt
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret) => {
+        delete ret._id
+      },
+    },
   },
 )
 
