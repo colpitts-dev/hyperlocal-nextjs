@@ -4,7 +4,7 @@ import { Person } from './models'
 const MONGO_URI =
   process.env.NODE_ENV === 'test' && process.env.MONGO_TEST_URI
     ? process.env.MONGO_TEST_URI
-    : process.env.MONGO_URI || 'mongodb://localhost:27017/test'
+    : process.env.MONGO_URI || 'mongodb://localhost:27017/hyperlocal-nextjs_dev'
 
 mongoose.set('strictQuery', false)
 mongoose

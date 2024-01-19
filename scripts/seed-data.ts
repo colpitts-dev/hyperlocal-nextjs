@@ -106,7 +106,7 @@ const getCommunitySeed = (i: number) => ({
 
 async function run() {
   const dbUri =
-    process.env.MONGO_URI || 'mongodb://localhost:27017/app-name_dev'
+    process.env.MONGO_URI || 'mongodb://localhost:27017/hyperlocal-nextjs_dev'
   mongoose.set('strictQuery', false)
 
   const conn = await connect(dbUri)

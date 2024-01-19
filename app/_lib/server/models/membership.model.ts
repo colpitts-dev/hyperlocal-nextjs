@@ -1,5 +1,7 @@
 import type { Document } from 'mongoose'
 import mongoose, { Schema, model } from 'mongoose'
+import { Person } from './person.model'
+import { Community } from './community.model'
 import type { PersonDocument } from './person.model'
 import type { CommunityDocument } from './community.model'
 
@@ -34,6 +36,38 @@ const MembershipSchema = new Schema<MembershipDocument>(
     timestamps: true,
   },
 )
+
+MembershipSchema.pre('save', async function (next) {
+  const membership = this
+
+  await Person.updateOne(
+    { _id: membership.owner._id },
+    { $push: { memberships: membership._id } },
+  )
+
+  await Community.updateOne(
+    { _id: membership.community._id },
+    { $push: { memberships: membership._id } },
+  )
+
+  next()
+})
+
+MembershipSchema.pre('findOneAndDelete', async function (next) {
+  let membership = this.getQuery()['_id']
+
+  await Person.updateOne(
+    { id: membership.owner._id },
+    { $pull: { memberships: membership._id } },
+  )
+
+  await Community.updateOne(
+    { id: membership.community._id },
+    { $pull: { memberships: membership._id } },
+  )
+
+  next()
+})
 
 /**
  * Membership Model

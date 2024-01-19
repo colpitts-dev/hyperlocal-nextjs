@@ -5,7 +5,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 async function globalSetup() {
-  // it's needed in global space, because we don't want to create a new instance every test-suite
+  // mms is needed in global space, because we don't want to create a new instance every test-suite
   const instance = await MongoMemoryServer.create()
   const uri = instance.getUri()
 

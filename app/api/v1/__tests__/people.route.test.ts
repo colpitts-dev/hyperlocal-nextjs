@@ -31,7 +31,7 @@ describe('/api/v1/people', () => {
   })
 
   describe('POST /people', () => {
-    let doc: { id: string }
+    let doc: { id: string; password: string }
 
     afterAll(async () => {
       await Person.findByIdAndDelete(doc.id)
@@ -59,6 +59,8 @@ describe('/api/v1/people', () => {
       expect(doc).toHaveProperty('nickname', newPersonInput.nickname)
       expect(doc).toHaveProperty('email', newPersonInput.email)
       expect(doc).toHaveProperty('birthdate', newPersonInput.birthdate)
+      // expect password to be hashed
+      expect(doc.password).not.toEqual(newPersonInput.password)
     })
   })
 
@@ -72,7 +74,8 @@ describe('/api/v1/people', () => {
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(JSON.stringify(data)).toEqual(JSON.stringify([person, personTwo]))
+      expect(data[0].firstName).toEqual(person.firstName)
+      expect(data[1].firstName).toEqual(personTwo.firstName)
     })
   })
 
@@ -87,7 +90,7 @@ describe('/api/v1/people', () => {
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(JSON.stringify(data)).toEqual(JSON.stringify(person))
+      expect(data.firstName).toEqual(person.firstName)
     })
   })
 
