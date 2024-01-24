@@ -3,23 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest",
+    "test": "cross-env NODE_ENV=test yarn test:unit && cross-env NODE_ENV=test yarn test:e2e",
     "test:e2e": "cross-env NODE_ENV=test jest --testMatch '<rootDir>/app/api/**/*.test.ts'",
     "test:unit": "cross-env NODE_ENV=test jest --testMatch '<rootDir>/app/_lib/server/models/**/*.test.ts'",
+    "db:drop": "npx ts-node --skip-project ./scripts/drop-db.ts",
     "db:seed": "npx ts-node --skip-project ./scripts/seed-data.ts",
+    "docs": "docker run -p 80:8080 -e SWAGGER_JSON=/docs/openapi.json -v ~/code/hyperlocal-nextjs/docs:/docs swaggerapi/swagger-editor",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "babel-jest": "^29.7.0",
     "mongoose": "^8.0.3",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.23.6",
+    "@babel/preset-env": "^7.23.8",
     "@babel/preset-typescript": "^7.23.3",
     "@faker-js/faker": "^8.3.1",
     "@testing-library/jest-dom": "^6.1.5",

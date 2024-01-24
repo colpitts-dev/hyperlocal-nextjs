@@ -21,18 +21,27 @@ describe('Person Model', () => {
       const fetchedPerson = await Person.findOne({ _id: person })
 
       expect(fetchedPerson).toBeDefined()
-      expect(fetchedPerson?.firstName).toEqual(personInput.firstName)
+      expect(fetchedPerson?.fullName).toEqual(
+        `${personInput.firstName} ${personInput.lastName}`,
+      )
+    })
+
+    it('hashes the password', async () => {
+      const fetchedPerson = await Person.findOne({ _id: person })
+
+      expect(fetchedPerson).toBeDefined()
+      expect(fetchedPerson?.hash).not.toEqual(personInput.password)
     })
 
     it('updates a person', async () => {
       const personUpdateInput: PersonInput = mockPerson()
       await Person.updateOne(
         { _id: person },
-        { ...personUpdateInput, firstName: 'John' },
+        { ...personUpdateInput, firstName: 'John', lastName: 'Doe' },
       )
       const fetchedPerson = await Person.findOne({ _id: person })
       expect(fetchedPerson).toBeDefined()
-      expect(fetchedPerson?.firstName).toBe('John')
+      expect(fetchedPerson?.fullName).toBe('John Doe')
     })
 
     it('deletes a person', async () => {
@@ -42,7 +51,7 @@ describe('Person Model', () => {
     })
   })
 
-  describe('when creating new people', () => {
+  describe('when validating documents', () => {
     const invalidPerson = new Person({
       nickname: undefined,
       firstName: undefined,
@@ -58,8 +67,8 @@ describe('Person Model', () => {
       expect(validationError).toBe('Nickname is required.')
     })
 
-    it('requires a password hash', () => {
-      const validationError = validationResult?.errors.hash.message
+    it('requires a password', () => {
+      const validationError = validationResult?.errors.password.message
       expect(validationError).toBe('Password hash is required.')
     })
 

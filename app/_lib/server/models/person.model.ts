@@ -1,5 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose'
 import type { Document } from 'mongoose'
+import bcrypt from 'bcryptjs'
 import type { MembershipDocument } from './membership.model'
 
 export interface PersonInput {
@@ -16,7 +17,6 @@ export interface PersonDocument extends Document, PersonInput {
   emailVerified: boolean
   memberships: MembershipDocument[]
   wallets: string[]
-  hash: string
   createdAt: Date
   updatedAt: Date
 }
@@ -27,7 +27,7 @@ const PersonSchema = new Schema<PersonDocument>(
     firstName: { type: String },
     lastName: { type: String },
     location: { type: String },
-    hash: { type: String, required: [true, 'Password hash is required.'] },
+    password: { type: String, required: [true, 'Password hash is required.'] },
     email: {
       type: String,
       trim: true,
@@ -78,11 +78,31 @@ const PersonSchema = new Schema<PersonDocument>(
       versionKey: false,
       transform: (_doc, ret) => {
         delete ret._id
-        delete ret.hash
+        delete ret.password
       },
     },
   },
 )
+
+PersonSchema.pre('save', async function (next) {
+  const hashedPassword = await bcrypt.hash(this.password, 10)
+  this.password = hashedPassword
+
+  next()
+})
+
+// Create a virtual property `fullName` with a getter and setter.
+PersonSchema.virtual('fullName')
+  .get(function () {
+    return `${this.firstName || this.nickname} ${this.lastName || ''}`
+  })
+  .set(function (v) {
+    // `v` is the value being set, so use the value to set
+    // `firstName` and `lastName`.
+    const firstName = v.substring(0, v.indexOf(' '))
+    const lastName = v.substring(v.indexOf(' ') + 1)
+    this.set({ firstName, lastName })
+  })
 
 /**
  * Person Model

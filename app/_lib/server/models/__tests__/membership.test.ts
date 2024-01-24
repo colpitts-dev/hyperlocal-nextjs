@@ -1,5 +1,5 @@
 import { mockCommunity } from '../__mocks__/community.mock'
-import { mockGeneralMembershipInput } from '../__mocks__/membership.mock'
+import { mockGeneralMembership } from '../__mocks__/membership.mock'
 import { mockPerson } from '../__mocks__/person.mock'
 import type { CommunityDocument, CommunityInput } from '../community.model'
 import { Community } from '../community.model'
@@ -21,7 +21,7 @@ describe('Membership Model', () => {
     person = new Person({ ...personInput })
     await person.save()
 
-    membershipInput = mockGeneralMembershipInput()
+    membershipInput = mockGeneralMembership()
     membership = new Membership({
       ...membershipInput,
       owner: person,
@@ -40,7 +40,7 @@ describe('Membership Model', () => {
   })
 
   describe('when given valid input', () => {
-    it('creates and reads a new document', async () => {
+    it('creates and reads a new membership', async () => {
       const fetchedMembership = await Membership.findOne({
         id: membership,
       })
@@ -50,11 +50,19 @@ describe('Membership Model', () => {
       expect(fetchedMembership?.isAdmin).toEqual(false)
     })
 
-    it('updates an existing document', async () => {
-      const membershipUpdateInput: MembershipInput =
-        mockGeneralMembershipInput()
+    it('associates a membership with a person and community', async () => {
+      const fetchedPerson = await Person.findById({ _id: person._id })
+      const fetchedCommunity = await Community.findById({ _id: community._id })
+      const expectedMemberships = [membership._id]
+
+      expect(fetchedPerson?.memberships).toEqual(expectedMemberships)
+      expect(fetchedCommunity?.memberships).toEqual(expectedMemberships)
+    })
+
+    it('updates an existing membership', async () => {
+      const membershipUpdateInput: MembershipInput = mockGeneralMembership()
       await Membership.updateOne(
-        { id: membership },
+        { _id: membership },
         { ...membershipUpdateInput },
       )
       const fetchedMembership = await Membership.findOne({
@@ -65,12 +73,20 @@ describe('Membership Model', () => {
       expect(fetchedMembership).not.toMatchObject(membershipInput)
     })
 
-    it('deletes an existing document', async () => {
-      await Membership.deleteOne({ id: membership })
+    it('deletes an existing membership', async () => {
+      await Membership.findOneAndDelete({ _id: membership })
+
       const fetchedMembership = await Membership.findOne({
-        id: membership,
+        _id: membership,
       })
       expect(fetchedMembership).toBeNull()
+    })
+
+    it('removes associations for owner and community', async () => {
+      const fetchedPerson = await Person.findOne({ _id: person })
+      const fetchedCommunity = await Community.findOne({ _id: community })
+      expect(fetchedPerson?.memberships).toHaveLength(0)
+      expect(fetchedCommunity?.memberships).toHaveLength(0)
     })
   })
 })

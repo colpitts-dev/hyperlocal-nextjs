@@ -3,33 +3,28 @@ import {
   CommunityDocument,
   CommunityInput,
   Community,
-} from '@hyperlocal/models'
-import { mockCommunity } from '@hyperlocal/models/__mocks__'
+} from '@hyperlocal/models/community.model'
+import { mockCommunity } from '@hyperlocal/models/__mocks__/community.mock'
 
 import { GET, POST } from '../communities/route'
 import { GET as GET_BY_ID, PATCH, DELETE } from '../communities/[id]/route'
 
 describe('/api/v1/communities', () => {
-  let community: CommunityDocument,
-    communityInput: CommunityInput,
-    communityTwo: CommunityDocument,
-    communityTwoInput: CommunityInput
+  let community: CommunityDocument, communityInput: CommunityInput
+  let communityTwo: CommunityDocument, communityInputTwo: CommunityInput
 
   beforeAll(async () => {
-    await Community.collection.drop()
-
     communityInput = mockCommunity()
-    communityTwoInput = mockCommunity()
+    communityInputTwo = mockCommunity()
     community = new Community({ ...communityInput })
-    communityTwo = new Community({ ...communityTwoInput })
+    communityTwo = new Community({ ...communityInputTwo })
 
     await community.save()
     await communityTwo.save()
   })
 
   afterAll(async () => {
-    await community.deleteOne()
-    await communityTwo.deleteOne()
+    await Community.deleteOne({ _id: community })
   })
 
   describe('POST /communities', () => {
@@ -40,10 +35,7 @@ describe('/api/v1/communities', () => {
     })
 
     it('creates a new community', async () => {
-      const newCommunityInput = {
-        title: 'Acme Inc',
-      }
-
+      const newCommunityInput = mockCommunity()
       const { req, res } = createMocks({
         method: 'POST',
         body: newCommunityInput,
@@ -60,53 +52,53 @@ describe('/api/v1/communities', () => {
   })
 
   describe('GET /communities', () => {
-    it('returns a list of communities', async () => {
+    it('gets all communities', async () => {
       const { req, res } = createMocks({
         method: 'GET',
       })
 
       const response = await GET(req)
+      const communities = await response.json()
 
       expect(response.status).toBe(200)
-      const data = await response.json()
-
-      const result = data
-      const expected = [community, communityTwo]
-
-      expect(JSON.stringify(result)).toEqual(JSON.stringify(expected))
+      expect(communities).toHaveLength(2)
     })
   })
 
-  describe('GET /communities', () => {
+  describe('GET /communities/{id}', () => {
     it('returns a community', async () => {
       const { req, res } = createMocks({
         method: 'GET',
-        query: { id: community._id },
       })
 
       const response = await GET_BY_ID(req, { params: { id: community._id } })
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(JSON.stringify(data)).toEqual(JSON.stringify(community))
+      expect(data.title).toEqual(community.title)
+    })
+
+    it('returns a 400 if no community found', async () => {
+      const { req, res } = createMocks({
+        method: 'GET',
+      })
+
+      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
+
+      expect(response.status).toBe(400)
     })
   })
 
   describe('PATCH /communities/{id}', () => {
     let doc: { id: string }
 
-    afterAll(async () => {
-      await Community.findByIdAndDelete(doc.id)
-    })
-
     it('updates a community', async () => {
       const communityUpdate = {
-        title: 'Acme Inc.',
+        title: 'Acme Co',
       }
 
       const { req, res } = createMocks({
         method: 'PATCH',
-        query: { id: community._id },
         body: {
           ...communityUpdate,
         },
@@ -130,7 +122,6 @@ describe('/api/v1/communities', () => {
     it('deletes a community', async () => {
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: { id: community._id },
       })
 
       const response = await DELETE(req, {

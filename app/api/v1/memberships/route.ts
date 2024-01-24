@@ -5,24 +5,20 @@ export async function GET(request: Request) {
   try {
     const memberships = await membershipsService.getAll()
     return NextResponse.json(memberships)
-  } catch (error: any) {
-    console.log(error?.message || error)
-    return NextResponse.json(
-      { message: error?.message || error },
-      { status: 400 },
-    )
+  } catch (error) {
+    return NextResponse.error()
   }
 }
 
 export async function POST(request: Request) {
+  const membershipInput = request?.json ? await request?.json() : request.body
   try {
-    const membership = await membershipsService.create(request.body)
-    return NextResponse.json(membership, { status: 201 })
+    const newMembership = await membershipsService.create(membershipInput)
+    return NextResponse.json(newMembership, {
+      status: 201,
+    })
   } catch (error: any) {
-    console.log(error?.message || error)
-    return NextResponse.json(
-      { message: error?.message || error },
-      { status: 400 },
-    )
+    const message = error?.message || error
+    return NextResponse.json({ message }, { status: 400 })
   }
 }

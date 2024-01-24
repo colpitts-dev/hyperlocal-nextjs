@@ -4,9 +4,13 @@ import * as communitiesService from '@hyperlocal/services/communities.service'
 export async function GET(request: Request, { params: { id } }: any) {
   try {
     const community = await communitiesService.getById(id)
+    if (!community)
+      return NextResponse.json(
+        { message: 'Community not found' },
+        { status: 400 },
+      )
     return NextResponse.json(community)
   } catch (error: any) {
-    console.log(error?.message || error)
     return NextResponse.json(
       { message: error?.message || error },
       { status: 400 },
@@ -17,10 +21,9 @@ export async function GET(request: Request, { params: { id } }: any) {
 export async function PATCH(request: Request, { params: { id } }: any) {
   try {
     const data = request?.json ? await request?.json() : request.body
-    const person = await communitiesService.update(id, data)
-    return NextResponse.json(person)
+    const community = await communitiesService.update(id, data)
+    return NextResponse.json(community)
   } catch (error: any) {
-    console.log(error?.message || error)
     return NextResponse.json(
       { message: error?.message || error },
       { status: 400 },

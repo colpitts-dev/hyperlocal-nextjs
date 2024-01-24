@@ -10,30 +10,32 @@ export async function getById(id: string) {
   try {
     return await Community.findById(id)
   } catch {
-    throw 'Person Not Found'
+    throw 'Community Not Found'
   }
 }
 
 export async function create(params: any) {
-  const doc = new Community(params)
-  // save user
-  await doc.save()
+  //todo: validate params
+  const community = new Community(params)
 
-  return doc.toJSON()
+  // save community
+  await community.save()
+
+  return community.toJSON()
 }
 
 export async function update(id: string, params: any) {
-  const doc = await Community.findById(id)
+  const community = await Community.findById(id)
 
   // validate
-  if (!doc) throw 'Community not found'
+  if (!community) throw 'Community not found'
 
   // copy params properties to user
-  Object.assign(doc, params)
+  Object.assign(community, params)
 
-  await doc.save()
+  await community.save()
 
-  return doc.toJSON()
+  return community.toJSON()
 }
 
 export async function _delete(id: string) {

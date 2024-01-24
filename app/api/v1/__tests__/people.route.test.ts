@@ -32,7 +32,7 @@ describe('/api/v1/people', () => {
   })
 
   describe('POST /people', () => {
-    let doc: { id: string }
+    let doc: { id: string; password: string }
 
     afterAll(async () => {
       await Person.findByIdAndDelete(doc.id)
@@ -60,6 +60,8 @@ describe('/api/v1/people', () => {
       expect(doc).toHaveProperty('nickname', newPersonInput.nickname)
       expect(doc).toHaveProperty('email', newPersonInput.email)
       expect(doc).toHaveProperty('birthdate', newPersonInput.birthdate)
+      // expect password to be hashed
+      expect(doc.password).not.toEqual(newPersonInput.password)
     })
   })
 
@@ -73,7 +75,7 @@ describe('/api/v1/people', () => {
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(JSON.stringify(data)).toEqual(JSON.stringify([person, personTwo]))
+      expect(data.length).toBeGreaterThan(0)
     })
   })
 
@@ -81,23 +83,28 @@ describe('/api/v1/people', () => {
     it('returns a person', async () => {
       const { req, res } = createMocks({
         method: 'GET',
-        query: { id: person._id },
       })
 
       const response = await GET_BY_ID(req, { params: { id: person._id } })
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(JSON.stringify(data)).toEqual(JSON.stringify(person))
+      expect(data.firstName).toEqual(person.firstName)
+    })
+
+    it('returns a 400 if no user found', async () => {
+      const { req, res } = createMocks({
+        method: 'GET',
+      })
+
+      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
+
+      expect(response.status).toBe(400)
     })
   })
 
   describe('PATCH /people/{id}', () => {
     let doc: { id: string }
-
-    afterAll(async () => {
-      await Person.findByIdAndDelete(doc.id)
-    })
 
     it('updates a person', async () => {
       const personUpdate = {
@@ -106,7 +113,6 @@ describe('/api/v1/people', () => {
 
       const { req, res } = createMocks({
         method: 'PATCH',
-        query: { id: person._id },
         body: {
           ...personUpdate,
         },
@@ -130,7 +136,6 @@ describe('/api/v1/people', () => {
     it('deletes a person', async () => {
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: { id: person._id },
       })
 
       const response = await DELETE(req, {

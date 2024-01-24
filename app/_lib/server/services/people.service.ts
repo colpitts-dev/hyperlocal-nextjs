@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs'
 import { db } from '../db'
 
 const { Person } = db
@@ -23,11 +22,6 @@ export async function create(params: any) {
 
   const person = new Person(params)
 
-  // hash password
-  if (params.password) {
-    person.hash = bcrypt.hashSync(params.password, 10)
-  }
-
   // save user
   await person.save()
 
@@ -44,11 +38,6 @@ export async function update(id: string, params: any) {
     (await Person.findOne({ email: params.email }))
   ) {
     throw 'Email "' + params.email + '" is already taken'
-  }
-
-  // hash password if it was entered
-  if (params.password) {
-    params.hash = bcrypt.hashSync(params.password, 10)
   }
 
   // copy params properties to user

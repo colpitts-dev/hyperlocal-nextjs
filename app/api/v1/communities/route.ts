@@ -5,24 +5,20 @@ export async function GET(request: Request) {
   try {
     const communities = await communitiesService.getAll()
     return NextResponse.json(communities)
-  } catch (error: any) {
-    console.log(error?.message || error)
-    return NextResponse.json(
-      { message: error?.message || error },
-      { status: 400 },
-    )
+  } catch (error) {
+    return NextResponse.error()
   }
 }
 
 export async function POST(request: Request) {
+  const communityInput = request?.json ? await request?.json() : request.body
   try {
-    const community = await communitiesService.create(request.body)
-    return NextResponse.json(community, { status: 201 })
+    const newPerson = await communitiesService.create(communityInput)
+    return NextResponse.json(newPerson, {
+      status: 201,
+    })
   } catch (error: any) {
-    console.log(error?.message || error)
-    return NextResponse.json(
-      { message: error?.message || error },
-      { status: 400 },
-    )
+    const message = error?.message || error
+    return NextResponse.json({ message }, { status: 400 })
   }
 }

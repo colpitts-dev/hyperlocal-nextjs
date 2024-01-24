@@ -3,73 +3,89 @@ import {
   MembershipDocument,
   MembershipInput,
   Membership,
-  PersonDocument,
-  PersonInput,
-  Community,
-  Person,
-  CommunityDocument,
-  CommunityInput,
-} from '@hyperlocal/models'
+} from '@hyperlocal/models/membership.model'
 import {
-  mockCommunity,
-  mockGeneralMembershipInput,
-  mockPerson,
-} from '@hyperlocal/models/__mocks__'
+  mockAdminMembership,
+  mockGeneralMembership,
+} from '@hyperlocal/models/__mocks__/membership.mock'
+import {
+  CommunityDocument,
+  Community,
+} from '@hyperlocal/models/community.model'
+import { mockCommunity } from '@hyperlocal/models/__mocks__/community.mock'
+import { PersonDocument, Person } from '@hyperlocal/models/person.model'
+import { mockPerson } from '@hyperlocal/models/__mocks__/person.mock'
 
 import { GET, POST } from '../memberships/route'
 import { GET as GET_BY_ID, PATCH, DELETE } from '../memberships/[id]/route'
 
 describe('/api/v1/memberships', () => {
-  let membership: MembershipDocument,
-    membershipInput: MembershipInput,
-    person: PersonDocument,
-    personInput: PersonInput,
-    community: CommunityDocument,
-    communityInput: CommunityInput
+  let personOne: PersonDocument,
+    personTwo: PersonDocument,
+    community: CommunityDocument
+
+  let generalMembership: MembershipDocument,
+    generalMembershipInput: MembershipInput
+
+  let adminMembership: MembershipDocument, adminMembershipInput: MembershipInput
 
   beforeAll(async () => {
-    await Membership.collection.drop()
+    personOne = new Person({ ...mockPerson() })
+    personTwo = new Person({ ...mockPerson() })
+    community = new Community({ ...mockCommunity() })
 
-    personInput = mockPerson()
+    await Promise.all([personOne.save(), personTwo.save(), community.save()])
 
-    person = new Person({ ...personInput })
-    await person.save()
+    generalMembershipInput = mockGeneralMembership()
+    adminMembershipInput = mockAdminMembership()
 
-    communityInput = mockCommunity()
-    community = new Community({ ...communityInput })
-    await community.save()
+    generalMembership = new Membership({
+      owner: personOne,
+      community,
+      ...generalMembershipInput,
+    })
 
-    membershipInput = mockGeneralMembershipInput()
-    membership = new Membership({ ...membershipInput })
-    membership.owner = person
-    membership.community = community
+    adminMembership = new Membership({
+      owner: personTwo,
+      community,
+      ...adminMembershipInput,
+    })
 
-    await membership.save()
+    await generalMembership.save()
+    await adminMembership.save()
   })
 
   afterAll(async () => {
-    await membership.deleteOne()
-    await person.deleteOne()
-    await community.deleteOne()
+    await Promise.all([
+      Membership.findOneAndDelete({ _id: generalMembership._id }),
+      Membership.findOneAndDelete({ _id: adminMembership._id }),
+    ])
+    await Promise.all([
+      Person.findOneAndDelete({ _id: personOne }),
+      Person.findOneAndDelete({ _id: personTwo }),
+      Community.findOneAndDelete({ _id: community }),
+    ])
   })
 
   describe('POST /memberships', () => {
-    let doc: { id: string }
+    let doc: { id: string; owner: { id: string }; community: { id: string } }
 
     afterAll(async () => {
-      await Membership.findByIdAndDelete(doc.id)
+      await Membership.findOneAndDelete(
+        { _id: doc.id },
+        { owner: personOne, community },
+      )
     })
 
     it('creates a new membership', async () => {
-      const newMembershipInput = {
-        title: 'Acme Inc',
-        owner: person._id,
-        community: community._id,
-      }
-
+      const newMembershipInput = mockGeneralMembership()
       const { req, res } = createMocks({
         method: 'POST',
-        body: newMembershipInput,
+        body: {
+          owner: personOne,
+          community: community,
+          ...newMembershipInput,
+        },
       })
 
       const response = await POST(req)
@@ -80,23 +96,27 @@ describe('/api/v1/memberships', () => {
       expect(doc).toHaveProperty('id')
       expect(doc).toHaveProperty('title', newMembershipInput.title)
     })
+
+    it('adds membership to person and community', async () => {
+      const fetchedPerson = await Person.findById(doc.owner.id)
+      const fetchedCommunity = await Community.findById(doc.community.id)
+      expect(fetchedPerson.memberships.includes(doc.id)).toBe(true)
+      expect(fetchedCommunity.memberships.includes(doc.id)).toBe(true)
+    })
   })
 
   describe('GET /memberships', () => {
-    it('returns a list of memberships', async () => {
+    it('gets all memberships', async () => {
       const { req, res } = createMocks({
         method: 'GET',
       })
 
       const response = await GET(req)
+      const memberships = await response.json()
 
       expect(response.status).toBe(200)
-      const data = await response.json()
-
-      const result = data
-      const expected = [membership]
-
-      expect(JSON.stringify(result)).toEqual(JSON.stringify(expected))
+      expect(memberships[0].isAdmin).toBe(false)
+      expect(memberships[1].isAdmin).toBe(true)
     })
   })
 
@@ -104,14 +124,25 @@ describe('/api/v1/memberships', () => {
     it('returns a membership', async () => {
       const { req, res } = createMocks({
         method: 'GET',
-        query: { id: membership._id },
       })
 
-      const response = await GET_BY_ID(req, { params: { id: membership._id } })
+      const response = await GET_BY_ID(req, {
+        params: { id: generalMembership._id },
+      })
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(JSON.stringify(data)).toEqual(JSON.stringify(membership))
+      expect(data.id).toEqual(generalMembership.id)
+    })
+
+    it('returns a 400 if no membership found', async () => {
+      const { req, res } = createMocks({
+        method: 'GET',
+      })
+
+      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
+
+      expect(response.status).toBe(400)
     })
   })
 
@@ -119,24 +150,23 @@ describe('/api/v1/memberships', () => {
     let doc: { id: string }
 
     afterAll(async () => {
-      await Membership.findByIdAndDelete(doc.id)
+      await Membership.findOneAndDelete({ _id: doc.id })
     })
 
     it('updates a membership', async () => {
       const membershipUpdate = {
-        title: 'Acme Inc.',
+        title: 'Acme Co',
       }
 
       const { req, res } = createMocks({
         method: 'PATCH',
-        query: { id: membership._id },
         body: {
           ...membershipUpdate,
         },
       })
 
       const response = await PATCH(req, {
-        params: { id: membership._id },
+        params: { id: generalMembership._id },
       })
       doc = await response.json()
 
@@ -148,21 +178,60 @@ describe('/api/v1/memberships', () => {
   })
 
   describe('DELETE /memberships/{id}', () => {
-    let doc: { id: string; message?: string }
+    let newMembership: MembershipDocument
+    let doc: { id: string; title: string }
 
     it('deletes a membership', async () => {
+      newMembership = new Membership({
+        owner: personOne,
+        community,
+        ...mockGeneralMembership(),
+      })
+
+      await newMembership.save()
+
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: { id: membership._id },
       })
 
       const response = await DELETE(req, {
-        params: { id: membership._id },
+        params: { id: newMembership.id },
       })
       doc = await response.json()
 
       expect(response.status).toBe(200)
-      expect(doc?.message).toBe('Membership deleted successfully')
+    })
+
+    it('removes membership from person and community', async () => {
+      newMembership = new Membership({
+        owner: personOne,
+        community,
+        ...mockGeneralMembership(),
+      })
+
+      await newMembership.save()
+      const { req, res } = createMocks({
+        method: 'DELETE',
+      })
+
+      const response = await DELETE(req, {
+        params: { id: newMembership.id },
+      })
+      doc = await response.json()
+
+      const fetchedPerson = await Person.findById(personOne.id)
+      const fetchedCommunity = await Community.findById(community.id)
+
+      const personAssociation = fetchedPerson.memberships.includes(
+        newMembership.id,
+      )
+      const communityAssociation = fetchedCommunity.memberships.includes(
+        newMembership.id,
+      )
+
+      expect(response.status).toBe(200)
+      expect(personAssociation).toBe(false)
+      expect(communityAssociation).toBe(false)
     })
   })
 })
