@@ -21,6 +21,7 @@ export async function PATCH(request: Request, { params: { id } }: any) {
     const person = await peopleService.update(id, data)
     return NextResponse.json(person)
   } catch (error: any) {
+    console.log(error?.message || error)
     return NextResponse.json(
       { message: error?.message || error },
       { status: 400 },
