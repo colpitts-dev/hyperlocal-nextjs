@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { Person } from './models'
+import { Person, Community, Membership } from './models'
 
 const MONGO_URI =
   process.env.NODE_ENV === 'test' && process.env.MONGO_TEST_URI
@@ -20,4 +20,6 @@ mongoose
 
 export const db = {
   Person,
+  Community,
+  Membership,
 }

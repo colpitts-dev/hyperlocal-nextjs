@@ -78,7 +78,7 @@ const PersonSchema = new Schema<PersonDocument>(
       versionKey: false,
       transform: (_doc, ret) => {
         delete ret._id
-        delete ret.hash
+        delete ret.password
       },
     },
   },
@@ -94,7 +94,7 @@ PersonSchema.pre('save', async function (next) {
 // Create a virtual property `fullName` with a getter and setter.
 PersonSchema.virtual('fullName')
   .get(function () {
-    return `${this.firstName} ${this.lastName}`
+    return `${this.firstName || this.nickname} ${this.lastName || ''}`
   })
   .set(function (v) {
     // `v` is the value being set, so use the value to set

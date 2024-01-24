@@ -34,6 +34,13 @@ const MembershipSchema = new Schema<MembershipDocument>(
   },
   {
     timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret) => {
+        delete ret._id
+      },
+    },
   },
 )
 
@@ -55,17 +62,20 @@ MembershipSchema.pre('save', async function (next) {
 
 MembershipSchema.pre('findOneAndDelete', async function (next) {
   let membership = this.getQuery()['_id']
+  let { owner, community } = this.getOptions()
+
+  let deletedMembership = membership._id || membership
+  let ownerId = membership.owner || owner?._id
+  let communityId = membership.community || community?._id
 
   await Person.updateOne(
-    { id: membership.owner._id },
-    { $pull: { memberships: membership._id } },
+    { _id: ownerId },
+    { $pull: { memberships: deletedMembership } },
   )
-
   await Community.updateOne(
-    { id: membership.community._id },
-    { $pull: { memberships: membership._id } },
+    { _id: communityId },
+    { $pull: { memberships: deletedMembership } },
   )
-
   next()
 })
 

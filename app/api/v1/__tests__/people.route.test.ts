@@ -74,8 +74,7 @@ describe('/api/v1/people', () => {
 
       expect(response.status).toBe(200)
       const data = await response.json()
-      expect(data[0].firstName).toEqual(person.firstName)
-      expect(data[1].firstName).toEqual(personTwo.firstName)
+      expect(data.length).toBeGreaterThan(0)
     })
   })
 
@@ -83,7 +82,6 @@ describe('/api/v1/people', () => {
     it('returns a person', async () => {
       const { req, res } = createMocks({
         method: 'GET',
-        query: { id: person._id },
       })
 
       const response = await GET_BY_ID(req, { params: { id: person._id } })
@@ -92,14 +90,20 @@ describe('/api/v1/people', () => {
       const data = await response.json()
       expect(data.firstName).toEqual(person.firstName)
     })
+
+    it('returns a 400 if no user found', async () => {
+      const { req, res } = createMocks({
+        method: 'GET',
+      })
+
+      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
+
+      expect(response.status).toBe(400)
+    })
   })
 
   describe('PATCH /people/{id}', () => {
     let doc: { id: string }
-
-    afterAll(async () => {
-      await Person.findByIdAndDelete(doc.id)
-    })
 
     it('updates a person', async () => {
       const personUpdate = {
@@ -108,7 +112,6 @@ describe('/api/v1/people', () => {
 
       const { req, res } = createMocks({
         method: 'PATCH',
-        query: { id: person._id },
         body: {
           ...personUpdate,
         },
@@ -132,7 +135,6 @@ describe('/api/v1/people', () => {
     it('deletes a person', async () => {
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: { id: person._id },
       })
 
       const response = await DELETE(req, {

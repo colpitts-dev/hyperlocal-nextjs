@@ -1,5 +1,5 @@
 import { mockCommunity } from '../__mocks__/community.mock'
-import { mockGeneralMembershipInput } from '../__mocks__/membership.mock'
+import { mockGeneralMembership } from '../__mocks__/membership.mock'
 import { mockPerson } from '../__mocks__/person.mock'
 import type { CommunityDocument, CommunityInput } from '../community.model'
 import { Community } from '../community.model'
@@ -21,7 +21,7 @@ describe('Membership Model', () => {
     person = new Person({ ...personInput })
     await person.save()
 
-    membershipInput = mockGeneralMembershipInput()
+    membershipInput = mockGeneralMembership()
     membership = new Membership({
       ...membershipInput,
       owner: person,
@@ -60,8 +60,7 @@ describe('Membership Model', () => {
     })
 
     it('updates an existing membership', async () => {
-      const membershipUpdateInput: MembershipInput =
-        mockGeneralMembershipInput()
+      const membershipUpdateInput: MembershipInput = mockGeneralMembership()
       await Membership.updateOne(
         { _id: membership },
         { ...membershipUpdateInput },

@@ -1,10 +1,8 @@
+import mongoose from 'mongoose'
 import { faker } from '@faker-js/faker'
 import type { CommunityDocument, CommunityInput } from '../community.model'
 import { Community } from '../community.model'
-
-const mockCommunity = () => ({
-  title: faker.lorem.words(6),
-})
+import { mockCommunity } from '../__mocks__/community.mock'
 
 describe('Community Model', () => {
   let community: CommunityDocument, communityInput: CommunityInput
