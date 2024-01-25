@@ -89,4 +89,51 @@ describe('Membership Model', () => {
       expect(fetchedCommunity?.memberships).toHaveLength(0)
     })
   })
+
+  describe('when given invalid input', () => {
+    it('requires a title', async () => {
+      const invalidMembership = new Membership({
+        title: '',
+        owner: person,
+        community,
+      })
+      const validationResult = invalidMembership.validateSync()
+      const validationError = validationResult?.errors.title.message
+      expect(validationError).toBe('Title is required.')
+    })
+
+    it('requires a valid owner id', async () => {
+      const invalidMembership = new Membership({
+        ...membershipInput,
+        owner: '65b1cb465e6e74a7732aa37c',
+        community,
+      })
+
+      let validationError
+      try {
+        await invalidMembership.save()
+      } catch (error: any) {
+        validationError = error?.message
+      }
+
+      expect(validationError).toBe('Owner not found.')
+    })
+
+    it('requires a valid community id', async () => {
+      const invalidMembership = new Membership({
+        ...membershipInput,
+        owner: person,
+        community: '65b1cb465e6e74a7732aa37c',
+      })
+
+      let validationError
+      try {
+        await invalidMembership.save()
+      } catch (error: any) {
+        validationError = error?.message
+      }
+
+      expect(validationError).toBe('Community not found.')
+    })
+  })
 })

@@ -46,6 +46,16 @@ const MembershipSchema = new Schema<MembershipDocument>(
 
 MembershipSchema.pre('save', async function (next) {
   const membership = this
+  const person = await Person.findOne({ _id: membership.owner })
+  const community = await Community.findOne({ _id: membership.community })
+
+  if (!person) {
+    throw new Error('Owner not found.')
+  }
+
+  if (!community) {
+    throw new Error('Community not found.')
+  }
 
   await Person.updateOne(
     { _id: membership.owner._id },

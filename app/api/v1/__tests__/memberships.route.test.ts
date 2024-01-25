@@ -68,7 +68,12 @@ describe('/api/v1/memberships', () => {
   })
 
   describe('POST /memberships', () => {
-    let doc: { id: string; owner: { id: string }; community: { id: string } }
+    let doc: {
+      id: string
+      owner: { id: string }
+      community: { id: string }
+      message?: string
+    }
 
     afterAll(async () => {
       await Membership.findOneAndDelete(
@@ -102,6 +107,42 @@ describe('/api/v1/memberships', () => {
       const fetchedCommunity = await Community.findById(doc.community.id)
       expect(fetchedPerson.memberships.includes(doc.id)).toBe(true)
       expect(fetchedCommunity.memberships.includes(doc.id)).toBe(true)
+    })
+
+    it('requires a valid owner id', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          ...mockGeneralMembership(),
+          owner: 'invalid-id',
+          community: community,
+        },
+      })
+
+      const response = await POST(req)
+      const error = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(error?.message).toContain('Membership validation failed: owner')
+    })
+
+    it('requires a valid community', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          ...mockGeneralMembership(),
+          owner: personOne,
+          community: 'invalid-id',
+        },
+      })
+
+      const response = await POST(req)
+      const error = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(error?.message).toContain(
+        'Membership validation failed: community',
+      )
     })
   })
 
