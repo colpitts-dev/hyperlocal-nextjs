@@ -29,7 +29,7 @@ export async function update(id: string, params: any) {
   const membership = await Membership.findById(id)
 
   // validate
-  if (!membership) throw 'Community not found'
+  if (!membership) throw 'Membership not found'
 
   // copy params properties to user
   Object.assign(membership, params)
@@ -41,6 +41,8 @@ export async function update(id: string, params: any) {
 
 export async function _delete(id: string) {
   const membership = await Membership.findById(id)
+  if (!membership) throw 'Membership not found'
+
   const owner = await Person.findById(membership.owner)
   const community = await Community.findById(membership.community)
 
