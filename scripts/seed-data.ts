@@ -130,9 +130,9 @@ async function run() {
 
     const personInput = mockPerson()
     const person = new Person({ ...personInput })
+    await person.save()
 
     const docs = await Community.aggregate([{ $sample: { size: 1 } }])
-
     const myCommunity = await Community.findById(docs[0])
 
     const membership = new Membership({
@@ -142,13 +142,6 @@ async function run() {
     })
 
     await membership.save()
-    myCommunity?.memberships?.push(membership)
-
-    await myCommunity?.save()
-    person.memberships.push(membership)
-
-    await person.save()
-
     j++
   }
 
