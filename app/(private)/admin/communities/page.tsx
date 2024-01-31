@@ -2,6 +2,9 @@
 
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
+import Breadcrumb from '@hyperlocal/ui/components/Breadcrumbs/Breadcrumb'
+import Card from '@hyperlocal/ui/components/Card'
+import Loader from '@hyperlocal/ui/components/Loader'
 
 export default function AdminPeople() {
   const [data, setData] = useState<[] | null>(null)
@@ -16,12 +19,7 @@ export default function AdminPeople() {
       })
   }, [])
 
-  if (isLoading)
-    return (
-      <main className="flex min-h-screen flex-col justify-center items-center p-4">
-        <p>Loading...</p>
-      </main>
-    )
+  if (isLoading) return <Loader />
   if (!data)
     return (
       <main className="flex min-h-screen flex-col justify-center items-center p-4">
@@ -29,33 +27,31 @@ export default function AdminPeople() {
       </main>
     )
   return (
-    <section className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-      {data.map(
-        (community: {
-          id: string
-          title: string
-          description: string
-          memberships: []
-        }) => (
-          <div
-            key={community.id}
-            className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          >
-            <h2 className={`mb-3 text-2xl font-semibold`}>
-              {community.title}{' '}
-              <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-                -&gt;
-              </span>
-            </h2>
-            <p className={`m-0 max-w-[30ch] text-sm opacity-75`}>
-              {community.description}
-            </p>
-            <p className={`m-0 max-w-[30ch] text-sm opacity-75`}>
-              members: {community.memberships?.length}
-            </p>
-          </div>
-        ),
-      )}
-    </section>
+    <>
+      <Breadcrumb pageName="Manage Communities" />
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+        {data.map(
+          (community: {
+            id: string
+            title: string
+            description: string
+            memberships: []
+          }) => (
+            <Card key={community.id}>
+              <h2 className={`mb-3 text-2xl font-semibold`}>
+                {community.title}
+              </h2>
+              <p className={`m-0 max-w-[30ch] text-sm opacity-75`}>
+                {community.description}
+              </p>
+              <p className={`m-0 max-w-[30ch] text-sm opacity-75`}>
+                members: {community.memberships?.length}
+              </p>
+            </Card>
+          ),
+        )}
+      </section>
+    </>
   )
 }
