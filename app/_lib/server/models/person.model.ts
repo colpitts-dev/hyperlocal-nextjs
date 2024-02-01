@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose'
 import type { Document } from 'mongoose'
-import bcrypt from 'bcryptjs'
+import bcrypt, { hash as _hash, compareSync } from 'bcryptjs'
 import type { MembershipDocument } from './membership.model'
 
 export interface PersonInput {
@@ -84,12 +84,31 @@ const PersonSchema = new Schema<PersonDocument>(
   },
 )
 
-PersonSchema.pre('save', async function (next) {
-  const hashedPassword = await bcrypt.hash(this.password, 10)
-  this.password = hashedPassword
-
-  next()
+PersonSchema.pre('save', function (next) {
+  // hash the password only if the password has been changed or user is new
+  if (!this.isModified('password')) {
+    next()
+    return
+  }
+  // generate the hash
+  _hash(this.password, 10, (err, hash) => {
+    if (err) {
+      next(err)
+      return
+    }
+    // change the password to the hashed version
+    this.password = hash
+    next()
+  })
 })
+// method to compare a given password with the database hash
+PersonSchema.methods.verifyPassword = async function (reqPassword: string) {
+  const isValid = await bcrypt.compare(reqPassword, this.password)
+  console.log('VERIFY PASSWORD: ', isValid)
+  return isValid
+}
+
+PersonSchema.index({ email: 1 }, { unique: true })
 
 // Create a virtual property `fullName` with a getter and setter.
 PersonSchema.virtual('fullName')

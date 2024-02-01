@@ -14,6 +14,8 @@
   "moduleNameMapper": {
     "^@hyperlocal/models/(.*)$": "<rootDir>/app/_lib/server/models/$1",
     "^@hyperlocal/models": "<rootDir>/app/_lib/server/models/index.ts",
+    "^@hyperlocal/server/(.*)$": "<rootDir>/app/_lib/server/$1",
+    "^@hyperlocal/server": "<rootDir>/app/_lib/server/index.ts",
     "^@hyperlocal/services/(.*)$": "<rootDir>/app/_lib/server/services/$1",
     "^.+\\.(css|less|scss)$": "identity-obj-proxy"
   },
