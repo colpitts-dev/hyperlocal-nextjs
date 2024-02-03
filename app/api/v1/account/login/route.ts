@@ -12,10 +12,14 @@ const handler = apiHandler({
 
 async function login(request: Request) {
   const body = request?.json ? await request?.json() : request.body
-  const { owner, token } = await peopleService.authenticate(body)
 
-  // return jwt token in http only cookie
-  cookies().set('authorization', token, { httpOnly: true, secure: true })
-
-  return owner
+  try {
+    const { owner, token } = await peopleService.authenticate(body)
+    // return jwt token in http only cookie
+    cookies().set('authorization', token, { httpOnly: true, secure: true })
+    return owner
+  } catch (e) {
+    console.log('API ERROR: account/login/route.ts', e)
+    throw new Error('Invalid credentials')
+  }
 }

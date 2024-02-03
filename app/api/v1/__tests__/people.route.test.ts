@@ -3,8 +3,7 @@ import {
   PersonDocument,
   PersonInput,
   Person,
-  Community,
-} from '@hyperlocal/models'
+} from '@hyperlocal/models/person.model'
 import { mockPerson } from '@hyperlocal/models/__mocks__/person.mock'
 
 import { GET, POST } from '../people/route'

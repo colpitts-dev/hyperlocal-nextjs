@@ -1,6 +1,4 @@
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
-import { headers } from 'next/headers'
 import { db } from '../db'
 
 const { Person } = db
@@ -12,14 +10,21 @@ export async function authenticate({
   email: string
   password: string
 }) {
-  const owner = await Person.findOne({ email })
+  const owner = await Person.findOne({ email }).populate('memberships')
   const validPassword = await owner?.verifyPassword(password)
+
   if (!owner || !validPassword) {
     throw 'Email or password is incorrect'
   }
 
+  // build aud claim for jwt payload
+  const aud = owner.memberships.map((m: any) => {
+    const role = m.isAdmin ? 'admin' : 'general'
+    return `${role}:${m.community._id}`
+  })
+
   // create a jwt token that is valid for 7 days
-  const token = jwt.sign({ sub: owner.id }, process.env.JWT_SECRET!, {
+  const token = jwt.sign({ sub: owner.id, aud }, process.env.JWT_SECRET!, {
     expiresIn: '7d',
   })
 
