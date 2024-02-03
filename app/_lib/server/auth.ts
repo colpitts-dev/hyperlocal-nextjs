@@ -4,6 +4,14 @@ import { cookies } from 'next/headers'
 export const auth = {
   isAuthenticated,
   verifyToken,
+  getClaims,
+}
+
+type HyperlocalToken = {
+  sub: string
+  aud: string[]
+  iat: number
+  exp: number
 }
 
 function isAuthenticated() {
@@ -13,6 +21,12 @@ function isAuthenticated() {
   } catch {
     return false
   }
+}
+
+function getClaims() {
+  const token = cookies().get('authorization')?.value ?? ''
+  const decoded = jwt.verify(token, process.env.JWT_SECRET!)
+  return decoded as HyperlocalToken
 }
 
 function verifyToken() {

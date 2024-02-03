@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const DropdownUser = () => {
+  const router = useRouter()
+
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const trigger = useRef<any>(null)
@@ -33,6 +36,14 @@ const DropdownUser = () => {
     document.addEventListener('keydown', keyHandler)
     return () => document.removeEventListener('keydown', keyHandler)
   })
+
+  const handleLogOut = async () => {
+    await fetch('/api/v1/account/logout', {
+      method: 'POST',
+    })
+    //this will reload the page without doing SSR
+    router.refresh()
+  }
 
   return (
     <div className="relative">
@@ -157,7 +168,10 @@ const DropdownUser = () => {
             </Link>
           </li>
         </ul>
-        <button className="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+        <button
+          onClick={handleLogOut}
+          className="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+        >
           <svg
             className="fill-current"
             width="22"

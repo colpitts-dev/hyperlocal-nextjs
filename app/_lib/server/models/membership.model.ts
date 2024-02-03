@@ -57,15 +57,20 @@ MembershipSchema.pre('save', async function (next) {
     throw new Error('Community not found.')
   }
 
-  await Person.updateOne(
-    { _id: membership.owner._id },
-    { $push: { memberships: membership._id } },
-  )
+  // check if the person is already a member of the community
+  const isMember = person.memberships.includes(membership._id)
 
-  await Community.updateOne(
-    { _id: membership.community._id },
-    { $push: { memberships: membership._id } },
-  )
+  if (!isMember) {
+    await Person.updateOne(
+      { _id: membership.owner._id },
+      { $push: { memberships: membership._id } },
+    )
+
+    await Community.updateOne(
+      { _id: membership.community._id },
+      { $push: { memberships: membership._id } },
+    )
+  }
 
   next()
 })
