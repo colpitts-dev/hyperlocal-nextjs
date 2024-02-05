@@ -20,6 +20,8 @@ export interface DashboardLayoutProps {
       }
       light: {
         primary: string
+        secondary: string
+        tertiary: string
       }
       dark: {
         primary: string
@@ -43,6 +45,8 @@ export const CommunityLayout: React.FC<DashboardLayoutProps> = ({
   const GlobalStyle = createGlobalStyle`
   :root {
     --color-primary: ${community?.theme?.light?.primary};
+    --color-secondary: ${community?.theme?.light?.secondary};
+    --color-tertiary: ${community?.theme?.light?.tertiary};
   }
 `
 

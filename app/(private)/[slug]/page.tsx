@@ -28,7 +28,7 @@ export default async function Page({ params: { slug } }: any) {
   return (
     <CommunityLayout community={data}>
       <main className="grid grid-cols-1 md:grid-cols-3 mx-auto md:max-w-6xl">
-        <section className="md:col-span-2">
+        <section className="md:col-span-2 ">
           <div className="flex space-x-2 p-6 border border-stroke dark:border-strokedark dark:bg-boxdark overflow-x-scroll scrollbar-none rounded-sm bg-white">
             <div className="cursor-pointer relative group">
               <img
@@ -533,6 +533,15 @@ export default async function Page({ params: { slug } }: any) {
                   Follow
                 </button>
               </div>
+            </div>
+            <div className="mt-8 ml-10">
+              <div className="flex justify-between mb-5 text-sm">
+                <h3 className="font-bold text-gray-400">Community Theme</h3>
+              </div>
+              <div className="bg-primary h-4 w-full mb-1" />
+              <div className="bg-secondary h-4 w-full mb-1" />
+              <div className="bg-tertiary h-4 w-full mb-1" />
+              <div className="bg-black dark:bg-gray h-4 w-full" />
             </div>
           </div>
         </section>
