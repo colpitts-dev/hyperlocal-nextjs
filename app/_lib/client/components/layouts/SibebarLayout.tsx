@@ -10,9 +10,7 @@ export interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  children,
-}) => {
+export const SidebarLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const [loading, setLoading] = useState<boolean>(true)

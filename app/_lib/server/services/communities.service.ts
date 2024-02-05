@@ -14,6 +14,14 @@ export async function getById(id: string) {
   }
 }
 
+export async function getBySlug(slug: string) {
+  try {
+    return await Community.findOne({ slug: slug })
+  } catch {
+    throw 'Community Not Found'
+  }
+}
+
 export async function create(params: any) {
   //todo: validate params
   const community = new Community(params)

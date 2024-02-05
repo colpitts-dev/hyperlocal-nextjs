@@ -1,7 +1,13 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { DashboardLayout } from '@hyperlocal/ui/components/Dashboard/Layout.component'
+import { SidebarLayout } from '@hyperlocal/ui/components/layouts/SibebarLayout'
 import { auth } from '@hyperlocal/server/auth'
 import './styles.css'
+
+export const metadata: Metadata = {
+  title: 'Hyperlocal | Public Landing',
+  description: 'An open source community engagement platform',
+}
 
 export default function RootLayout({
   children,
@@ -32,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
-        <DashboardLayout>{children}</DashboardLayout>
+        <SidebarLayout>{children}</SidebarLayout>
       </body>
     </html>
   )
