@@ -1,6 +1,7 @@
 import type { Document } from 'mongoose'
 import mongoose, { model, Schema } from 'mongoose'
 import type { MembershipDocument } from './membership.model'
+import slugify from 'slugify'
 
 export interface CommunityInput {
   title: string
@@ -10,6 +11,7 @@ export interface CommunityInput {
 }
 
 export interface CommunityDocument extends CommunityInput, Document {
+  slug: string
   memberships?: MembershipDocument[]
   updatedAt: Date
   createdAt: Date
@@ -28,6 +30,7 @@ const CommunitySchema = new Schema<CommunityDocument>(
       },
       required: [true, 'Title is required.'],
     },
+    slug: { type: String, unique: true },
     description: {
       type: String,
     },
@@ -54,6 +57,18 @@ const CommunitySchema = new Schema<CommunityDocument>(
     },
   },
 )
+
+CommunitySchema.pre('save', function (next) {
+  const doc = this as CommunityDocument
+
+  if (!doc.isModified('title')) return next()
+
+  const slug = slugify(doc.title, { lower: true, trim: true })
+
+  doc.slug = slug
+
+  return next()
+})
 
 /**
  * Community Model
