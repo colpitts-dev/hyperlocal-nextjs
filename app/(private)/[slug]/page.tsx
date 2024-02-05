@@ -156,7 +156,7 @@ export default async function Page({ params: { slug } }: any) {
           <div className="border border-stroke dark:border-strokedark dark:bg-boxdark my-7 bg-white rounded-md">
             <div className="flex items-center p-5">
               <img
-                className="h-12 rounded-full border p-1 mr-3"
+                className="h-12 rounded-full border border-tertiary p-1 mr-3"
                 src="https://placekeanu.com/128/128?img=0"
                 alt="user-image"
               />
@@ -187,7 +187,7 @@ export default async function Page({ params: { slug } }: any) {
               <div className="flex space-x-4 h-[24px] w-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn"
+                  className="btn hover:text-secondary cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -201,7 +201,7 @@ export default async function Page({ params: { slug } }: any) {
                 </svg>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn"
+                  className="btn hover:text-secondary cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -215,7 +215,7 @@ export default async function Page({ params: { slug } }: any) {
                 </svg>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn rotate-45 h-6"
+                  className="btn rotate-45 h-6 hover:text-secondary cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -230,7 +230,7 @@ export default async function Page({ params: { slug } }: any) {
 
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn"
+                  className="btn hover:text-secondary cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -296,7 +296,7 @@ export default async function Page({ params: { slug } }: any) {
             <form className="flex items-center p-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
+                className="h-7 w-7 mr-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -310,7 +310,7 @@ export default async function Page({ params: { slug } }: any) {
               </svg>
 
               <input
-                className="border-none flex-1 focus:ring-0"
+                className="border-none flex-1 focus:ring-0 mr-4"
                 type="text"
                 placeholder="Enter your comment"
               />
@@ -320,8 +320,8 @@ export default async function Page({ params: { slug } }: any) {
           <div className="border border-stroke dark:border-strokedark dark:bg-boxdark my-7 bg-white rounded-md">
             <div className="flex items-center p-5">
               <img
-                className="h-12 rounded-full border p-1 mr-3"
-                src="https://static.skillshare.com/uploads/users/350301760/user-image-large.jpg?753816048"
+                className="h-12 rounded-full border border-tertiary p-1 mr-3"
+                src="https://placekeanu.com/128/128?img=0"
                 alt="user-image"
               />
               <p className="flex-1 font-bold">somerando</p>
@@ -351,7 +351,7 @@ export default async function Page({ params: { slug } }: any) {
               <div className="flex space-x-4 h-[24px] w-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn"
+                  className="btn hover:text-secondary cursor-pointer"
                   fill="red"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -365,7 +365,7 @@ export default async function Page({ params: { slug } }: any) {
                 </svg>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn"
+                  className="btn hover:text-secondary cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -379,7 +379,7 @@ export default async function Page({ params: { slug } }: any) {
                 </svg>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn rotate-45 h-6"
+                  className="btn rotate-45 h-6 hover:text-secondary cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -394,7 +394,7 @@ export default async function Page({ params: { slug } }: any) {
 
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="btn"
+                  className="btn hover:text-secondary cursor-pointer"
                   fill="black"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -461,7 +461,7 @@ export default async function Page({ params: { slug } }: any) {
             <form className="flex items-center p-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
+                className="h-7 w-7 mr-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -475,7 +475,7 @@ export default async function Page({ params: { slug } }: any) {
               </svg>
 
               <input
-                className="border-none flex-1 focus:ring-0"
+                className="border-none flex-1 focus:ring-0 mr-4"
                 type="text"
                 placeholder="Enter your comment"
               />
@@ -499,7 +499,7 @@ export default async function Page({ params: { slug } }: any) {
                 />
                 <div className="flex-1 ml-4">
                   <h2 className="font-semibold text-sm">john26375</h2>
-                  <h3 className="text-sm text-gray-400">Manager</h3>
+                  <h3 className="text-sm text-gray-400">Admin</h3>
                 </div>
                 <button className="font-semibold text-blue-400 text-sm">
                   Follow
@@ -513,7 +513,7 @@ export default async function Page({ params: { slug } }: any) {
                 />
                 <div className="flex-1 ml-4">
                   <h2 className="font-semibold text-sm">davidlkdnc75</h2>
-                  <h3 className="text-sm text-gray-400">Manager</h3>
+                  <h3 className="text-sm text-gray-400">Member</h3>
                 </div>
                 <button className="font-semibold text-blue-400 text-sm">
                   Follow
@@ -527,7 +527,7 @@ export default async function Page({ params: { slug } }: any) {
                 />
                 <div className="flex-1 ml-4">
                   <h2 className="font-semibold text-sm">sarasjhgcvsvc</h2>
-                  <h3 className="text-sm text-gray-400">Engineer</h3>
+                  <h3 className="text-sm text-gray-400">Member</h3>
                 </div>
                 <button className="font-semibold text-blue-400 text-sm">
                   Follow
