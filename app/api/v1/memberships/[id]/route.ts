@@ -20,17 +20,17 @@ const handler = apiHandler({
   DELETE: _delete,
 })
 
-export async function getById(request: Request, { params: { id } }: any) {
+async function getById(request: Request, { params: { id } }: any) {
   const membership = await membershipService.getById(id)
   if (!membership) throw new Error('Membership not found')
   return membership
 }
 
-export async function update(request: Request, { params: { id } }: any) {
+async function update(request: Request, { params: { id } }: any) {
   const data = request?.json ? await request?.json() : request.body
   return await membershipService.update(id, data)
 }
 
-export async function _delete(request: Request, { params: { id } }: any) {
+async function _delete(request: Request, { params: { id } }: any) {
   return await membershipService._delete(id)
 }

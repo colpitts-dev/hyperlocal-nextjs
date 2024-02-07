@@ -14,11 +14,11 @@ const handler = apiHandler({
   POST: create,
 })
 
-export async function getAll() {
+async function getAll() {
   return await membershipsService.getAll()
 }
 
-export async function create(request: Request) {
+async function create(request: Request) {
   const membershipInput = request?.json ? await request?.json() : request.body
   return await membershipsService.create(membershipInput)
 }

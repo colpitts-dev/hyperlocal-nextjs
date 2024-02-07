@@ -15,11 +15,11 @@ const handler = apiHandler({
   POST: create,
 })
 
-export async function getAll(request: Request) {
+async function getAll(request: Request) {
   return await communitiesService.getAll()
 }
 
-export async function create(request: Request) {
+async function create(request: Request) {
   const communityInput = request?.json ? await request?.json() : request.body
   return await communitiesService.create(communityInput)
 }

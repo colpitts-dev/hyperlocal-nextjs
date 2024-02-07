@@ -19,17 +19,17 @@ const handler = apiHandler({
   DELETE: _delete,
 })
 
-export async function getById(request: Request, { params: { id } }: any) {
+async function getById(request: Request, { params: { id } }: any) {
   const community = await communitiesService.getById(id)
   if (!community) throw new Error('Community not found')
   return community
 }
 
-export async function update(request: Request, { params: { id } }: any) {
+async function update(request: Request, { params: { id } }: any) {
   const data = request?.json ? await request?.json() : request.body
   return await communitiesService.update(id, data)
 }
 
-export async function _delete(request: Request, { params: { id } }: any) {
+async function _delete(request: Request, { params: { id } }: any) {
   return await communitiesService._delete(id)
 }
