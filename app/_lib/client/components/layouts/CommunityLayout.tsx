@@ -9,30 +9,25 @@ import Header from '@hyperlocal/ui/components/Header'
 
 export interface DashboardLayoutProps {
   children: React.ReactNode
-  community: {
-    title: string
-    slug: string
-    description: string
-    theme: {
-      ui: {
-        light: string
-        dark: string
-      }
-      light: {
-        primary: string
-        secondary: string
-        tertiary: string
-      }
-      dark: {
-        primary: string
-      }
+  theme: {
+    ui: {
+      light: string
+      dark: string
+    }
+    light: {
+      primary: string
+      secondary: string
+      tertiary: string
+    }
+    dark: {
+      primary: string
     }
   }
 }
 
 export const CommunityLayout: React.FC<DashboardLayoutProps> = ({
   children,
-  community,
+  theme,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -44,9 +39,9 @@ export const CommunityLayout: React.FC<DashboardLayoutProps> = ({
 
   const GlobalStyle = createGlobalStyle`
   :root {
-    --color-primary: ${community?.theme?.light?.primary};
-    --color-secondary: ${community?.theme?.light?.secondary};
-    --color-tertiary: ${community?.theme?.light?.tertiary};
+    --color-primary: ${theme?.light?.primary};
+    --color-secondary: ${theme?.light?.secondary};
+    --color-tertiary: ${theme?.light?.tertiary};
   }
 `
 

@@ -5,6 +5,7 @@ import { auth } from '@hyperlocal/server/auth'
 import * as communitiesService from '@hyperlocal/services/communities.service'
 import StyledComponentsRegistry from '@hyperlocal/_lib/client/helpers/registry'
 import './styles.css'
+import { AuthProvider } from '@hyperlocal/ui/providers/authProvider'
 
 export const metadata: Metadata = {
   title: 'Hyperlocal | Community Landing',
@@ -18,7 +19,6 @@ export default async function RootLayout({
   children: React.ReactNode
   params: { slug: string }
 }) {
-  console.log('ROOT LAYOUT', params.slug)
   // redirect to login if not authorized
   const redirectToLogin = () => {
     const redirectUrl = encodeURIComponent(`/${params.slug}`)
@@ -32,11 +32,8 @@ export default async function RootLayout({
 
     // get community
     const community = await communitiesService.getBySlug(params.slug)
-    console.log('COMMUNITY', community)
-
     const isMember = aud.filter(a => a.includes(community?._id)).length > 0
 
-    console.log('CHECK COMMUNITY MEMBERSHIP', isMember, aud)
     if (!isMember) {
       redirectToLogin()
     }
@@ -47,7 +44,9 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <StyledComponentsRegistry>
+          <AuthProvider>{children}</AuthProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   )

@@ -5,10 +5,8 @@ export { jwtMiddleware }
 
 async function jwtMiddleware(req: NextRequest) {
   if (isPublicPath(req)) return
-  console.log('---------------- JWT MIDDLEWARE ----------------')
   // verify token in request cookie
   const id = auth.verifyToken()
-  console.log('ownerId:', id)
   req.headers.set('ownerId', id)
 }
 

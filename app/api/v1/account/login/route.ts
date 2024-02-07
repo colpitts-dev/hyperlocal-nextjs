@@ -17,7 +17,7 @@ async function login(request: Request) {
     const { owner, token } = await peopleService.authenticate(body)
     // return jwt token in http only cookie
     cookies().set('authorization', token, { httpOnly: true, secure: true })
-    return owner
+    return { name: owner.fullName.trim(), email: owner.email }
   } catch (e) {
     console.log('API ERROR: account/login/route.ts', e)
     throw new Error('Invalid credentials')

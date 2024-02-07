@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useAccount } from '@hyperlocal/ui/hooks/useAccount'
+import { useAuth } from '../../providers/authProvider'
 
 const DropdownUser = () => {
   const router = useRouter()
+  const { account } = useAuth()
 
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
@@ -55,9 +58,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Adam Colpitts
+            {account?.name}
           </span>
-          <span className="block text-xs">UX Developer</span>
+          <span className="block text-xs">{account?.email}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full overflow-hidden">
