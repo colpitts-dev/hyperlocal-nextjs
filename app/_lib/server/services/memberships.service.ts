@@ -4,7 +4,7 @@ import { Community, Person } from '../models'
 const { Membership } = db
 
 export async function getAll() {
-  return await Membership.find().populate('owner').populate('community')
+  return await Membership.find()
 }
 
 export async function getById(id: string) {

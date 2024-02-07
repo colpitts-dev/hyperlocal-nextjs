@@ -1,24 +1,25 @@
 import { NextResponse } from 'next/server'
+import { apiHandler } from '@hyperlocal/server/api'
 import * as communitiesService from '@hyperlocal/services/communities.service'
 
 export async function GET(request: Request) {
-  try {
-    const communities = await communitiesService.getAll()
-    return NextResponse.json(communities)
-  } catch (error) {
-    return NextResponse.error()
-  }
+  return handler.GET(request)
 }
 
 export async function POST(request: Request) {
+  return handler.POST(request)
+}
+
+const handler = apiHandler({
+  GET: getAll,
+  POST: create,
+})
+
+export async function getAll(request: Request) {
+  return await communitiesService.getAll()
+}
+
+export async function create(request: Request) {
   const communityInput = request?.json ? await request?.json() : request.body
-  try {
-    const newPerson = await communitiesService.create(communityInput)
-    return NextResponse.json(newPerson, {
-      status: 201,
-    })
-  } catch (error: any) {
-    const message = error?.message || error
-    return NextResponse.json({ message }, { status: 400 })
-  }
+  return await communitiesService.create(communityInput)
 }

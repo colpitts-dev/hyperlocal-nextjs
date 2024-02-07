@@ -1,24 +1,24 @@
-import { NextResponse } from 'next/server'
+import { apiHandler } from '@hyperlocal/server/api'
 import * as membershipsService from '@hyperlocal/services/memberships.service'
 
 export async function GET(request: Request) {
-  try {
-    const memberships = await membershipsService.getAll()
-    return NextResponse.json(memberships)
-  } catch (error) {
-    return NextResponse.error()
-  }
+  return handler.GET(request)
 }
 
 export async function POST(request: Request) {
+  return handler.POST(request)
+}
+
+const handler = apiHandler({
+  GET: getAll,
+  POST: create,
+})
+
+export async function getAll() {
+  return await membershipsService.getAll()
+}
+
+export async function create(request: Request) {
   const membershipInput = request?.json ? await request?.json() : request.body
-  try {
-    const newMembership = await membershipsService.create(membershipInput)
-    return NextResponse.json(newMembership, {
-      status: 201,
-    })
-  } catch (error: any) {
-    const message = error?.message || error
-    return NextResponse.json({ message }, { status: 400 })
-  }
+  return await membershipsService.create(membershipInput)
 }

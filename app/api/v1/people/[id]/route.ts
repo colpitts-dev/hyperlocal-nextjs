@@ -31,20 +31,10 @@ async function getById(request: Request, { params: { id } }: any) {
 }
 
 async function update(request: Request, { params: { id } }: any) {
-  try {
-    const data = request?.json ? await request?.json() : request.body
-    const person = await peopleService.update(id, data)
-    return person
-  } catch (error: any) {
-    throw new Error(error)
-  }
+  const data = request?.json ? await request?.json() : request.body
+  return await peopleService.update(id, data)
 }
 
 async function _delete(request: Request, { params: { id } }: any) {
-  try {
-    await peopleService._delete(id)
-    return { message: 'Person deleted successfully' }
-  } catch (error: any) {
-    throw new Error(error)
-  }
+  return await peopleService._delete(id)
 }
