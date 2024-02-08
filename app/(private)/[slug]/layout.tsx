@@ -5,7 +5,8 @@ import { auth } from '@hyperlocal/server/auth'
 import * as communitiesService from '@hyperlocal/services/communities.service'
 import StyledComponentsRegistry from '@hyperlocal/_lib/client/helpers/registry'
 import './styles.css'
-import { AuthProvider } from '@hyperlocal/ui/providers/authProvider'
+import { AuthProvider } from '@hyperlocal/providers/authProvider'
+import { Web3Provider } from '@hyperlocal/providers'
 
 export const metadata: Metadata = {
   title: 'Hyperlocal | Community Landing',
@@ -45,7 +46,9 @@ export default async function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <StyledComponentsRegistry>
-          <AuthProvider>{children}</AuthProvider>
+          <Web3Provider>
+            <AuthProvider>{children}</AuthProvider>
+          </Web3Provider>
         </StyledComponentsRegistry>
       </body>
     </html>

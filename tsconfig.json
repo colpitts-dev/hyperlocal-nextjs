@@ -31,6 +31,8 @@
     "paths": {
       "@hyperlocal/*": ["./app/*"],
       "@hyperlocal/ui/*": ["./app/_lib/client/*"],
+      "@hyperlocal/providers/*": ["./app/_lib/client/providers/*"],
+      "@hyperlocal/providers": ["./app/_lib/client/providers"],
       "@hyperlocal/models/*": ["./app/_lib/server/models/*"],
       "@hyperlocal/server/*": ["./app/_lib/server/*"],
       "@hyperlocal/services/*": ["./app/_lib/server/services/*"]

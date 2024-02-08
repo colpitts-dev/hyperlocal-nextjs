@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useAccount } from '@hyperlocal/ui/hooks/useAccount'
 import { useAuth } from '../../providers/authProvider'
+import { useAccount } from '@hyperlocal/ui/hooks/web3'
 
 const DropdownUser = () => {
   const router = useRouter()
   const { account } = useAuth()
+  const { data } = useAccount('Some Random Params')
+
+  console.log({ data })
 
   const [dropdownOpen, setDropdownOpen] = useState(false)
 

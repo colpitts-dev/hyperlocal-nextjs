@@ -6,6 +6,7 @@ import { createGlobalStyle } from 'styled-components'
 
 import Sidebar from '@hyperlocal/ui/components/Sidebar'
 import Header from '@hyperlocal/ui/components/Header'
+import { useWeb3 } from '../../providers'
 
 export interface DashboardLayoutProps {
   children: React.ReactNode
@@ -38,12 +39,12 @@ export const CommunityLayout: React.FC<DashboardLayoutProps> = ({
   }, [])
 
   const GlobalStyle = createGlobalStyle`
-  :root {
-    --color-primary: ${theme?.light?.primary};
-    --color-secondary: ${theme?.light?.secondary};
-    --color-tertiary: ${theme?.light?.tertiary};
-  }
-`
+    :root {
+      --color-primary: ${theme?.light?.primary};
+      --color-secondary: ${theme?.light?.secondary};
+      --color-tertiary: ${theme?.light?.tertiary};
+    }
+  `
 
   return (
     <>
