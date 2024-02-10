@@ -1,4 +1,9 @@
-import Image from 'next/image'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Hyperlocal | Public Landing',
+  description: 'An open source community engagement platform',
+}
 
 export default function Home() {
   return (

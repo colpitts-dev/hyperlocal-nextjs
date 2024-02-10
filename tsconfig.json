@@ -33,9 +33,16 @@
       "@hyperlocal/ui/*": ["./app/_lib/client/*"],
       "@hyperlocal/models/*": ["./app/_lib/server/models/*"],
       "@hyperlocal/server/*": ["./app/_lib/server/*"],
-      "@hyperlocal/services/*": ["./app/_lib/server/services/*"]
+      "@hyperlocal/services/*": ["./app/_lib/server/services/*"],
+      "@hyperlocal/types/*": ["./app/_lib/types/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

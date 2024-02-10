@@ -1,11 +1,10 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { SidebarLayout } from '@hyperlocal/ui/components/layouts/SibebarLayout'
+import { AdminLayout } from '@hyperlocal/_lib/client/components/layouts/AdminLayout'
 import { auth } from '@hyperlocal/server/auth'
-import './styles.css'
 
 export const metadata: Metadata = {
-  title: 'Hyperlocal | Public Landing',
+  title: 'Hyperlocal | Admin Dashboard',
   description: 'An open source community engagement platform',
 }
 
@@ -35,11 +34,5 @@ export default function RootLayout({
     redirectToLogin()
   }
 
-  return (
-    <html lang="en">
-      <body suppressHydrationWarning={true}>
-        <SidebarLayout>{children}</SidebarLayout>
-      </body>
-    </html>
-  )
+  return <AdminLayout>{children}</AdminLayout>
 }
