@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useAccount } from '@hyperlocal/ui/hooks/useAccount'
-import { useAuth } from '../../providers/authProvider'
+import { useAuth } from '@hyperlocal/ui/providers/auth'
 
 const DropdownUser = () => {
   const router = useRouter()

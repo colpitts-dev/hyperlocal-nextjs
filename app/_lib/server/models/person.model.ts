@@ -104,7 +104,6 @@ PersonSchema.pre('save', function (next) {
 // method to compare a given password with the database hash
 PersonSchema.methods.verifyPassword = async function (reqPassword: string) {
   const isValid = await bcrypt.compare(reqPassword, this.password)
-  console.log('VERIFY PASSWORD: ', isValid)
   return isValid
 }
 
@@ -113,7 +112,10 @@ PersonSchema.index({ email: 1 }, { unique: true })
 // Create a virtual property `fullName` with a getter and setter.
 PersonSchema.virtual('fullName')
   .get(function () {
-    return `${this.firstName || this.nickname} ${this.lastName || ''}`
+    const fullName = `${this.firstName || this.nickname} ${
+      this.lastName || ''
+    }`.trim()
+    return fullName
   })
   .set(function (v) {
     // `v` is the value being set, so use the value to set

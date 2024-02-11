@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { db } from '../db'
+import { Address } from 'viem'
 
 const { Person } = db
 
@@ -44,6 +45,43 @@ export async function authenticate({
   }
 }
 
+export async function authenticateWallet(walletAddress: Address) {
+  console.log('GET OWNER BY WALLET ADDRESS: ', walletAddress)
+  const owner = await Person.findOne({ wallets: walletAddress }).populate(
+    'memberships',
+  )
+
+  if (!owner) {
+    throw 'Account not found'
+  }
+
+  // build aud claim for jwt payload
+  const aud = owner?.memberships.map((m: any) => {
+    const role = m.isAdmin ? 'admin' : 'general'
+    return `${role}:${m.community._id}`
+  })
+
+  // create a jwt token that is valid for 7 days
+  const token = jwt.sign(
+    {
+      sub: owner.id,
+      aud,
+      name: owner.fullName.trim(),
+      email: owner.email,
+      email_verified: owner.emailVerified,
+    },
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: '7d',
+    },
+  )
+
+  return {
+    owner: owner.toJSON(),
+    token,
+  }
+}
+
 export async function getAll() {
   return await Person.find()
 }
@@ -54,6 +92,10 @@ export async function getById(id: string) {
   } catch {
     throw 'Person Not Found'
   }
+}
+
+export async function getByWalletAddress(walletAddress: string) {
+  return await Person.find({ wallets: walletAddress })
 }
 
 export async function create(params: any) {
