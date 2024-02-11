@@ -10,9 +10,12 @@ import {
   useSignMessage,
 } from 'wagmi'
 import { SiweMessage } from 'siwe'
+import { Address } from 'viem'
 
 export interface Account {
   name: string
+  email: string
+  wallet?: Address
 }
 
 interface AuthContextProps {
@@ -32,7 +35,6 @@ const AuthContext = React.createContext<AuthContextProps>({
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const connection = useConnectorClient()
   const { disconnect } = useDisconnect()
   const { isConnected, address, chain } = useAccount()
   const { signMessageAsync } = useSignMessage()
@@ -43,7 +45,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   useEffect(() => {
-    const fetchAccount = async () => {
+    const checkAccount = async () => {
       const response = await fetch('/api/v1/account/check', {
         method: 'POST',
         headers: {
@@ -53,13 +55,33 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ walletAddress: address }),
       })
       const data = await response.json()
-      console.log('HAS ACCOUNT: ', data?.ok)
+      console.log('CHECK ACCOUNT: ', data?.ok)
       setHasAccount(data?.ok || false)
     }
-    if (isConnected && !currentAccount) {
+
+    if (isConnected) {
+      checkAccount()
+    }
+  }, [])
+
+  useEffect(() => {
+    const fetchAccount = async () => {
+      const response = await fetch('/api/v1/account/me', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+      const res = await response.json()
+      console.log('FETCH ACCOUNT: ', res?.ok)
+      console.log('ACCOUNT: ', res)
+      setCurrentAccount(res)
+    }
+    if (hasAccount) {
       fetchAccount()
     }
-  }, [isConnected, address, currentAccount])
+  }, [hasAccount])
 
   // NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -76,12 +98,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ email, password }),
         })
         if (res.ok) {
+          const data = await res.json()
+
           const redirectUrl = decodeURIComponent(
             searchParams?.get('redirectUrl') || '/',
           )
-          //window.location.href = redirectUrl
-
           Promise.resolve(redirectUrl)
+          window.location.href = redirectUrl
         } else {
           Promise.reject('Error logging in')
         }
@@ -136,8 +159,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       await fetch('/api/v1/account/logout', {
         method: 'POST',
       })
-      //this will reload the page without doing SSR
-      //router.refresh()
     },
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
