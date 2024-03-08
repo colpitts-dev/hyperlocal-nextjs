@@ -1,10 +1,9 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { ThemeProvider } from 'styled-components'
 import { auth } from '@hyperlocal/server/auth'
 import * as communitiesService from '@hyperlocal/services/communities.service'
 import { CommunityTheme } from '@hyperlocal/types/Community'
-import { CommunityLayout } from '@hyperlocal/ui/components/Layouts/CommunityLayout'
+import { CommunityLayout } from '@hyperlocal/ui/components/LayoutsFolder/CommunityLayout'
 
 export const metadata: Metadata = {
   title: 'Hyperlocal | Community Engagement',
