@@ -19,6 +19,6 @@ async function getAll() {
 }
 
 async function create(request: Request) {
-  const personInput = request?.json ? await request?.json() : request.body
+  const personInput = await request.json()
   return await peopleService.create(personInput)
 }

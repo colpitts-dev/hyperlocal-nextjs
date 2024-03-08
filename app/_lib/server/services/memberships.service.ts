@@ -16,13 +16,8 @@ export async function getById(id: string) {
 }
 
 export async function create(params: any) {
-  //todo: validate params
   const membership = new Membership(params)
-
-  // save membership
-  await membership.save()
-
-  return membership.toJSON()
+  return await membership.save()
 }
 
 export async function update(id: string, params: any) {

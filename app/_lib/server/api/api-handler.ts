@@ -25,6 +25,7 @@ function apiHandler(handler: any) {
 
         // route handler
         const responseBody = await handler[method](req, ...args)
+
         return NextResponse.json(responseBody || {}, {
           status: method === 'POST' ? 201 : 200,
         })

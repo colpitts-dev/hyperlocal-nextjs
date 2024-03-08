@@ -2,13 +2,13 @@ import mongoose from 'mongoose'
 import { Person, Community, Membership } from './models'
 
 const MONGO_URI =
-  process.env.NODE_ENV === 'test' && process.env.MONGO_TEST_URI
-    ? process.env.MONGO_TEST_URI
-    : process.env.MONGO_URI
+  process.env.NODE_ENV === 'test'
+    ? (process.env.MONGO_TEST_URI as string)
+    : (process.env.MONGO_URI as string)
 
 mongoose.set('strictQuery', false)
 mongoose
-  .connect(MONGO_URI as string, {
+  .connect(MONGO_URI, {
     autoCreate: true,
   })
   .then(() => {

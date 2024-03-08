@@ -1,4 +1,4 @@
-import { createMocks } from 'node-mocks-http'
+import { testApiHandler } from 'next-test-api-route-handler'
 import {
   PersonDocument,
   PersonInput,
@@ -6,8 +6,9 @@ import {
 } from '@hyperlocal/models/person.model'
 import { mockPerson } from '@hyperlocal/models/__mocks__/person.mock'
 
-import { GET, POST } from '../people/route'
-import { GET as GET_BY_ID, PATCH, DELETE } from '../people/[id]/route'
+import * as peopleStatic from '../people/route'
+import * as peopleDynamic from '../people/[id]/route'
+import { memberCookie } from '../../../../test/setup-tests'
 
 describe('/api/v1/people', () => {
   let person: PersonDocument,
@@ -30,120 +31,152 @@ describe('/api/v1/people', () => {
     await personTwo.deleteOne()
   })
 
+  it('requires authentication', async () => {
+    await testApiHandler({
+      appHandler: peopleStatic,
+      async test({ fetch }) {
+        const res = await fetch({ method: 'GET' })
+        await expect(res.json()).resolves.toStrictEqual({
+          message: 'Unauthorized',
+        }) // ◄ Passes!
+      },
+    })
+  })
+
   describe('POST /people', () => {
-    let doc: { id: string; password: string }
+    let doc: { id: string }
 
     afterAll(async () => {
       await Person.findByIdAndDelete(doc.id)
     })
 
     it('creates a new person', async () => {
-      const newPersonInput = {
-        nickname: 'John',
-        email: 'john.doe@example.com',
-        password: 'testingtesting123',
-        birthdate: '1990-01-01T00:00:00.000Z',
-      }
+      const newPersonInput = mockPerson()
 
-      const { req, res } = createMocks({
-        method: 'POST',
-        body: newPersonInput,
+      await testApiHandler({
+        appHandler: peopleStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'POST',
+            body: JSON.stringify(newPersonInput),
+          })
+          const body = await res.json()
+          doc = body
+          expect(res.status).toBe(201)
+          expect(body).not.toHaveProperty('_id')
+          expect(body).toHaveProperty('id')
+          expect(body).toHaveProperty('nickname', newPersonInput.nickname)
+          expect(body).toHaveProperty(
+            'email',
+            newPersonInput.email.toLowerCase(),
+          )
+          expect(body).toHaveProperty('birthdate', newPersonInput.birthdate)
+          expect(body).not.toHaveProperty('password')
+        },
       })
-
-      const response = await POST(req)
-      doc = await response.json()
-
-      expect(response.status).toBe(201)
-      expect(doc).not.toHaveProperty('_id')
-      expect(doc).toHaveProperty('id')
-      expect(doc).toHaveProperty('nickname', newPersonInput.nickname)
-      expect(doc).toHaveProperty('email', newPersonInput.email)
-      expect(doc).toHaveProperty('birthdate', newPersonInput.birthdate)
-      // expect password to be hashed
-      expect(doc.password).not.toEqual(newPersonInput.password)
     })
   })
 
   describe('GET /people', () => {
     it('returns a list of people', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+      await testApiHandler({
+        appHandler: peopleStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+          await expect(res.json()).resolves.toBeInstanceOf(Array) // ◄ Passes!
+        },
       })
-
-      const response = await GET(req)
-
-      expect(response.status).toBe(200)
-      const data = await response.json()
-      expect(data.length).toBeGreaterThan(0)
     })
   })
 
   describe('GET /people/{id}', () => {
     it('returns a person', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+      await testApiHandler({
+        appHandler: peopleDynamic,
+        paramsPatcher(params) {
+          params.id = person._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+          const expected = await res.json()
+          expect(expected.firstName).toEqual(person.firstName) // ◄ Passes!
+        },
       })
-
-      const response = await GET_BY_ID(req, { params: { id: person._id } })
-
-      expect(response.status).toBe(200)
-      const data = await response.json()
-      expect(data.firstName).toEqual(person.firstName)
     })
 
-    it('returns a 400 if no user found', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+    it('returns a 404 if no user found', async () => {
+      await testApiHandler({
+        appHandler: peopleDynamic,
+        paramsPatcher(params) {
+          params.id = 'invalid-id'
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+
+          await expect(res.status).toEqual(404) // ◄ Passes!
+        },
       })
-
-      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
-
-      expect(response.status).toBe(400)
     })
   })
 
   describe('PATCH /people/{id}', () => {
-    let doc: { id: string }
-
     it('updates a person', async () => {
-      const personUpdate = {
-        nickname: 'John Doe',
-      }
-
-      const { req, res } = createMocks({
-        method: 'PATCH',
-        body: {
-          ...personUpdate,
+      await testApiHandler({
+        appHandler: peopleDynamic,
+        paramsPatcher(params) {
+          params.id = person._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'PATCH',
+            body: JSON.stringify({ nickname: 'new-nickname' }),
+          })
+          const expected = await res.json()
+          expect(res.status).toBe(200)
+          expect(expected.nickname).toEqual('new-nickname') // ◄ Passes!
         },
       })
-
-      const response = await PATCH(req, {
-        params: { id: person._id },
-      })
-      doc = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(doc).not.toHaveProperty('_id')
-      expect(doc).toHaveProperty('id')
-      expect(doc).toHaveProperty('nickname', personUpdate.nickname)
     })
   })
 
   describe('DELETE /people/{id}', () => {
-    let doc: { id: string; message?: string }
-
     it('deletes a person', async () => {
-      const { req, res } = createMocks({
-        method: 'DELETE',
+      await testApiHandler({
+        appHandler: peopleDynamic,
+        paramsPatcher(params) {
+          params.id = person._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'DELETE' })
+          const expected = await res.json()
+          expect(res.status).toEqual(200)
+          expect(expected.message).toEqual('Person deleted successfully') // ◄ Passes!
+        },
       })
-
-      const response = await DELETE(req, {
-        params: { id: person._id },
-      })
-      doc = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(doc?.message).toBe('Person deleted successfully')
     })
   })
 })

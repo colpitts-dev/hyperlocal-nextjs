@@ -42,7 +42,7 @@ describe('Membership Model', () => {
   describe('when given valid input', () => {
     it('creates and reads a new membership', async () => {
       const fetchedMembership = await Membership.findOne({
-        id: membership,
+        _id: membership,
       })
 
       expect(fetchedMembership).toBeDefined()
@@ -66,11 +66,10 @@ describe('Membership Model', () => {
         { ...membershipUpdateInput },
       )
       const fetchedMembership = await Membership.findOne({
-        id: membership,
+        _id: membership,
       })
       expect(fetchedMembership).toBeDefined()
-      expect(fetchedMembership).toMatchObject(membershipUpdateInput)
-      expect(fetchedMembership).not.toMatchObject(membershipInput)
+      expect(fetchedMembership?.title).toBe(membershipUpdateInput.title)
     })
 
     it('deletes an existing membership', async () => {

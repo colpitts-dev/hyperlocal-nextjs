@@ -1,4 +1,4 @@
-import { apiHandler } from '@hyperlocal/server/api'
+import { ApiRequestError, apiHandler } from '@hyperlocal/server/api'
 import * as membershipsService from '@hyperlocal/services/memberships.service'
 
 export async function GET(request: Request) {
@@ -19,6 +19,10 @@ async function getAll() {
 }
 
 async function create(request: Request) {
-  const membershipInput = request?.json ? await request?.json() : request.body
-  return await membershipsService.create(membershipInput)
+  try {
+    const membershipInput = await request.json()
+    return await membershipsService.create(membershipInput)
+  } catch (e: any) {
+    throw new ApiRequestError(e, 400)
+  }
 }
