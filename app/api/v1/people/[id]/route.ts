@@ -26,15 +26,16 @@ async function getById(request: Request, { params: { id } }: any) {
     if (!person) throw new ApiRequestError('Person not found', 400)
     return person
   } catch (e: any) {
-    throw new ApiRequestError(e, 400)
+    throw new ApiRequestError(e, 404)
   }
 }
 
 async function update(request: Request, { params: { id } }: any) {
-  const data = request?.json ? await request?.json() : request.body
+  const data = await request.json()
   return await peopleService.update(id, data)
 }
 
 async function _delete(request: Request, { params: { id } }: any) {
-  return await peopleService._delete(id)
+  await peopleService._delete(id)
+  return { message: 'Person deleted successfully' }
 }

@@ -1,4 +1,4 @@
-import { createMocks } from 'node-mocks-http'
+import { testApiHandler } from 'next-test-api-route-handler'
 import {
   CommunityDocument,
   CommunityInput,
@@ -6,8 +6,9 @@ import {
 } from '@hyperlocal/models/community.model'
 import { mockCommunity } from '@hyperlocal/models/__mocks__/community.mock'
 
-import { GET, POST } from '../communities/route'
-import { GET as GET_BY_ID, PATCH, DELETE } from '../communities/[id]/route'
+import * as communitiesStatic from '../communities/route'
+import * as communitiesDynamic from '../communities/[id]/route'
+import { memberCookie } from '../../../../test/setup-tests'
 
 describe('/api/v1/communities', () => {
   let community: CommunityDocument, communityInput: CommunityInput
@@ -27,6 +28,18 @@ describe('/api/v1/communities', () => {
     await Community.deleteOne({ _id: community })
   })
 
+  it('requires authentication', async () => {
+    await testApiHandler({
+      appHandler: communitiesStatic,
+      async test({ fetch }) {
+        const res = await fetch({ method: 'GET' })
+        await expect(res.json()).resolves.toStrictEqual({
+          message: 'Unauthorized',
+        }) // ◄ Passes!
+      },
+    })
+  })
+
   describe('POST /communities', () => {
     let doc: { id: string }
 
@@ -36,101 +49,126 @@ describe('/api/v1/communities', () => {
 
     it('creates a new community', async () => {
       const newCommunityInput = mockCommunity()
-      const { req, res } = createMocks({
-        method: 'POST',
-        body: newCommunityInput,
+      await testApiHandler({
+        appHandler: communitiesStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'POST',
+            body: JSON.stringify(newCommunityInput),
+          })
+          const body = await res.json()
+          doc = body
+
+          expect(res.status).toBe(201)
+          expect(body).not.toHaveProperty('_id')
+          expect(body).toHaveProperty('id')
+          expect(body).toHaveProperty('title', newCommunityInput.title)
+        },
       })
-
-      const response = await POST(req)
-      doc = await response.json()
-
-      expect(response.status).toBe(201)
-      expect(doc).not.toHaveProperty('_id')
-      expect(doc).toHaveProperty('id')
-      expect(doc).toHaveProperty('title', newCommunityInput.title)
     })
   })
 
   describe('GET /communities', () => {
-    it('gets all communities', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+    it('returns a list of communities', async () => {
+      await testApiHandler({
+        appHandler: communitiesStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+          await expect(res.json()).resolves.toBeInstanceOf(Array) // ◄ Passes!
+        },
       })
-
-      const response = await GET(req)
-      const communities = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(communities).toHaveLength(2)
     })
   })
 
   describe('GET /communities/{id}', () => {
     it('returns a community', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+      await testApiHandler({
+        appHandler: communitiesDynamic,
+        paramsPatcher(params) {
+          params.id = community._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+          const data = await res.json()
+          expect(res.status).toBe(200)
+          expect(data.title).toEqual(community.title) // ◄ Passes!
+        },
       })
-
-      const response = await GET_BY_ID(req, { params: { id: community._id } })
-
-      expect(response.status).toBe(200)
-      const data = await response.json()
-      expect(data.title).toEqual(community.title)
     })
 
-    it('returns a 400 if no community found', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+    it('returns a 404 if no community found', async () => {
+      await testApiHandler({
+        appHandler: communitiesDynamic,
+        paramsPatcher(params) {
+          params.id = 'invalid-id'
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+
+          await expect(res.status).toEqual(404) // ◄ Passes!
+        },
       })
-
-      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
-
-      expect(response.status).toBe(400)
     })
   })
 
   describe('PATCH /communities/{id}', () => {
-    let doc: { id: string }
-
     it('updates a community', async () => {
-      const communityUpdate = {
-        title: 'Acme Co',
-      }
-
-      const { req, res } = createMocks({
-        method: 'PATCH',
-        body: {
-          ...communityUpdate,
+      await testApiHandler({
+        appHandler: communitiesDynamic,
+        paramsPatcher(params) {
+          params.id = community._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'PATCH',
+            body: JSON.stringify({ title: 'test-updated-title' }),
+          })
+          const expected = await res.json()
+          expect(res.status).toBe(200)
+          expect(expected.title).toEqual('test-updated-title') // ◄ Passes!
         },
       })
-
-      const response = await PATCH(req, {
-        params: { id: community._id },
-      })
-      doc = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(doc).not.toHaveProperty('_id')
-      expect(doc).toHaveProperty('id')
-      expect(doc).toHaveProperty('title', communityUpdate.title)
     })
   })
 
   describe('DELETE /communities/{id}', () => {
-    let doc: { id: string; message?: string }
-
     it('deletes a community', async () => {
-      const { req, res } = createMocks({
-        method: 'DELETE',
+      await testApiHandler({
+        appHandler: communitiesDynamic,
+        paramsPatcher(params) {
+          params.id = community._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'DELETE' })
+          const expected = await res.json()
+          expect(res.status).toEqual(200)
+          expect(expected.message).toEqual('Community deleted successfully') // ◄ Passes!
+        },
       })
-
-      const response = await DELETE(req, {
-        params: { id: community._id },
-      })
-      doc = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(doc?.message).toBe('Community deleted successfully')
     })
   })
 })

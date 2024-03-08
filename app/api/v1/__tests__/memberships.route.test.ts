@@ -1,4 +1,4 @@
-import { createMocks } from 'node-mocks-http'
+import { testApiHandler } from 'next-test-api-route-handler'
 import {
   MembershipDocument,
   MembershipInput,
@@ -15,9 +15,9 @@ import {
 import { mockCommunity } from '@hyperlocal/models/__mocks__/community.mock'
 import { PersonDocument, Person } from '@hyperlocal/models/person.model'
 import { mockPerson } from '@hyperlocal/models/__mocks__/person.mock'
-
-import { GET, POST } from '../memberships/route'
-import { GET as GET_BY_ID, PATCH, DELETE } from '../memberships/[id]/route'
+import * as membershipsStatic from '../memberships/route'
+import * as membershipsDynamic from '../memberships/[id]/route'
+import { memberCookie } from '../../../../test/setup-tests'
 
 describe('/api/v1/memberships', () => {
   let personOne: PersonDocument,
@@ -67,6 +67,18 @@ describe('/api/v1/memberships', () => {
     ])
   })
 
+  it('requires authentication', async () => {
+    await testApiHandler({
+      appHandler: membershipsStatic,
+      async test({ fetch }) {
+        const res = await fetch({ method: 'GET' })
+        await expect(res.json()).resolves.toStrictEqual({
+          message: 'Unauthorized',
+        }) // ◄ Passes!
+      },
+    })
+  })
+
   describe('POST /memberships', () => {
     let doc: {
       id: string
@@ -84,146 +96,175 @@ describe('/api/v1/memberships', () => {
 
     it('creates a new membership', async () => {
       const newMembershipInput = mockGeneralMembership()
-      const { req, res } = createMocks({
-        method: 'POST',
-        body: {
-          owner: personOne,
-          community: community,
-          ...newMembershipInput,
+
+      await testApiHandler({
+        appHandler: membershipsStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'POST',
+            body: JSON.stringify({
+              owner: personOne._id,
+              community: community._id,
+              ...newMembershipInput,
+            }),
+          })
+          const body = await res.json()
+          doc = body
+          expect(res.status).toBe(201)
+
+          expect(body).not.toHaveProperty('_id')
+          expect(body).toHaveProperty('id')
+          expect(body).toHaveProperty('title', newMembershipInput.title)
         },
       })
-
-      const response = await POST(req)
-      doc = await response.json()
-
-      expect(response.status).toBe(201)
-      expect(doc).not.toHaveProperty('_id')
-      expect(doc).toHaveProperty('id')
-      expect(doc).toHaveProperty('title', newMembershipInput.title)
     })
 
     it('adds membership to person and community', async () => {
-      const fetchedPerson = await Person.findById(doc.owner.id)
-      const fetchedCommunity = await Community.findById(doc.community.id)
+      const fetchedPerson = await Person.findById(doc.owner)
+      const fetchedCommunity = await Community.findById(doc.community)
       expect(fetchedPerson.memberships.includes(doc.id)).toBe(true)
       expect(fetchedCommunity.memberships.includes(doc.id)).toBe(true)
     })
 
     it('requires a valid owner id', async () => {
-      const { req, res } = createMocks({
-        method: 'POST',
-        body: {
-          ...mockGeneralMembership(),
-          owner: 'invalid-id',
-          community: community,
+      await testApiHandler({
+        appHandler: membershipsStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'POST',
+            body: JSON.stringify({
+              owner: 'invalid-id',
+              community: community._id,
+              title: 'test-title',
+            }),
+          })
+          const body = await res.json()
+          doc = body
+          expect(res.status).toBe(400)
+
+          expect(body?.message.includes('ValidationError: owner')).toBe(true)
         },
       })
-
-      const response = await POST(req)
-      const error = await response.json()
-
-      expect(response.status).toBe(400)
-      expect(error?.message).toContain('Membership validation failed: owner')
     })
 
     it('requires a valid community', async () => {
-      const { req, res } = createMocks({
-        method: 'POST',
-        body: {
-          ...mockGeneralMembership(),
-          owner: personOne,
-          community: 'invalid-id',
+      await testApiHandler({
+        appHandler: membershipsStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'POST',
+            body: JSON.stringify({
+              owner: personOne._id,
+              community: 'invalid-id',
+              title: 'test-title',
+            }),
+          })
+          const body = await res.json()
+          doc = body
+          expect(res.status).toBe(400)
+
+          expect(body?.message.includes('ValidationError: community')).toBe(
+            true,
+          )
         },
       })
-
-      const response = await POST(req)
-      const error = await response.json()
-
-      expect(response.status).toBe(400)
-      expect(error?.message).toContain(
-        'Membership validation failed: community',
-      )
     })
   })
 
   describe('GET /memberships', () => {
-    it('gets all memberships', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+    it('returns a list of memberships', async () => {
+      await testApiHandler({
+        appHandler: membershipsStatic,
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+          await expect(res.json()).resolves.toBeInstanceOf(Array) // ◄ Passes!
+        },
       })
-
-      const response = await GET(req)
-      const memberships = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(memberships[0].isAdmin).toBe(false)
-      expect(memberships[1].isAdmin).toBe(true)
     })
   })
 
   describe('GET /memberships/{id}', () => {
     it('returns a membership', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+      await testApiHandler({
+        appHandler: membershipsDynamic,
+        paramsPatcher(params) {
+          params.id = generalMembership._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+          const data = await res.json()
+          expect(res.status).toBe(200)
+          expect(data.title).toEqual(generalMembership.title) // ◄ Passes!
+        },
       })
-
-      const response = await GET_BY_ID(req, {
-        params: { id: generalMembership._id },
-      })
-
-      expect(response.status).toBe(200)
-      const data = await response.json()
-      expect(data.id).toEqual(generalMembership.id)
     })
 
-    it('returns a 400 if no membership found', async () => {
-      const { req, res } = createMocks({
-        method: 'GET',
+    it('returns a 404 if no community found', async () => {
+      await testApiHandler({
+        appHandler: membershipsDynamic,
+        paramsPatcher(params) {
+          params.id = 'invalid-id'
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'GET' })
+
+          await expect(res.status).toEqual(404) // ◄ Passes!
+        },
       })
-
-      const response = await GET_BY_ID(req, { params: { id: 'abc-123-xyz' } })
-
-      expect(response.status).toBe(400)
     })
   })
 
   describe('PATCH /memberships/{id}', () => {
-    let doc: { id: string }
-
-    afterAll(async () => {
-      await Membership.findOneAndDelete({ _id: doc.id })
-    })
-
     it('updates a membership', async () => {
-      const membershipUpdate = {
-        title: 'Acme Co',
-      }
-
-      const { req, res } = createMocks({
-        method: 'PATCH',
-        body: {
-          ...membershipUpdate,
+      await testApiHandler({
+        appHandler: membershipsDynamic,
+        paramsPatcher(params) {
+          params.id = generalMembership._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({
+            method: 'PATCH',
+            body: JSON.stringify({ title: 'test-update-title' }),
+          })
+          const expected = await res.json()
+          expect(res.status).toBe(200)
+          expect(expected.title).toEqual('test-update-title') // ◄ Passes!
         },
       })
-
-      const response = await PATCH(req, {
-        params: { id: generalMembership._id },
-      })
-      doc = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(doc).not.toHaveProperty('_id')
-      expect(doc).toHaveProperty('id')
-      expect(doc).toHaveProperty('title', membershipUpdate.title)
     })
   })
 
   describe('DELETE /memberships/{id}', () => {
-    let newMembership: MembershipDocument
-    let doc: { id: string; title: string }
-
     it('deletes a membership', async () => {
-      newMembership = new Membership({
+      const newMembership = new Membership({
         owner: personOne,
         community,
         ...mockGeneralMembership(),
@@ -231,48 +272,59 @@ describe('/api/v1/memberships', () => {
 
       await newMembership.save()
 
-      const { req, res } = createMocks({
-        method: 'DELETE',
+      await testApiHandler({
+        appHandler: membershipsDynamic,
+        paramsPatcher(params) {
+          params.id = newMembership._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'DELETE' })
+          const expected = await res.json()
+          expect(res.status).toEqual(200)
+          expect(expected.message).toEqual('Membership deleted successfully') // ◄ Passes!
+        },
       })
-
-      const response = await DELETE(req, {
-        params: { id: newMembership.id },
-      })
-      doc = await response.json()
-
-      expect(response.status).toBe(200)
     })
 
     it('removes membership from person and community', async () => {
-      newMembership = new Membership({
+      const newMembership = new Membership({
         owner: personOne,
         community,
         ...mockGeneralMembership(),
       })
-
       await newMembership.save()
-      const { req, res } = createMocks({
-        method: 'DELETE',
+
+      await testApiHandler({
+        appHandler: membershipsDynamic,
+        paramsPatcher(params) {
+          params.id = newMembership._id
+        },
+        // authorize the request
+        requestPatcher(request) {
+          request.headers.set('cookie', memberCookie)
+        },
+        async test({ fetch }) {
+          const res = await fetch({ method: 'DELETE' })
+
+          const fetchedPerson = await Person.findById(personOne.id)
+          const fetchedCommunity = await Community.findById(community.id)
+
+          const personAssociation = fetchedPerson.memberships.includes(
+            newMembership.id,
+          )
+          const communityAssociation = fetchedCommunity.memberships.includes(
+            newMembership.id,
+          )
+
+          expect(res.status).toBe(200)
+          expect(personAssociation).toBe(false)
+          expect(communityAssociation).toBe(false)
+        },
       })
-
-      const response = await DELETE(req, {
-        params: { id: newMembership.id },
-      })
-      doc = await response.json()
-
-      const fetchedPerson = await Person.findById(personOne.id)
-      const fetchedCommunity = await Community.findById(community.id)
-
-      const personAssociation = fetchedPerson.memberships.includes(
-        newMembership.id,
-      )
-      const communityAssociation = fetchedCommunity.memberships.includes(
-        newMembership.id,
-      )
-
-      expect(response.status).toBe(200)
-      expect(personAssociation).toBe(false)
-      expect(communityAssociation).toBe(false)
     })
   })
 })

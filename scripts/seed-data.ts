@@ -1,10 +1,13 @@
-import mongoose, { connect } from 'mongoose'
+import readline from 'readline'
 import dotenv from 'dotenv'
+import mongoose, { connect } from 'mongoose'
 import { faker } from '@faker-js/faker'
 import { Person, Community, Membership } from '../app/_lib/server/models'
 import { mockPerson } from '../app/_lib/server/models/__mocks__/person.mock'
 
-dotenv.config()
+dotenv.config({
+  path: '.env.local',
+})
 
 const COMMUNITY_SEEDS = 4
 const PEOPLE_SEEDS = 25
@@ -105,8 +108,7 @@ const getCommunitySeed = (i: number) => ({
 })
 
 async function run() {
-  const dbUri =
-    process.env.MONGO_URI || 'mongodb://localhost:27017/hyperlocal-nextjs_dev'
+  const dbUri = process.env.MONGO_URI as string
   mongoose.set('strictQuery', false)
 
   const conn = await connect(dbUri)
@@ -152,4 +154,27 @@ async function run() {
   process.exit(0)
 }
 
-run().catch(err => console.log(err))
+function askQuestion() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  return new Promise(resolve =>
+    rl.question(
+      'Are you sure you want to destroy all data and seed the database? (yes/no) ',
+      answer => {
+        if (answer === 'yes') {
+          run()
+            .then(() => resolve(0))
+            .catch(err => console.log(err))
+        } else {
+          console.log('👋 Database drop cancelled')
+          process.exit(0)
+        }
+      },
+    ),
+  )
+}
+
+askQuestion()

@@ -32,5 +32,6 @@ async function update(request: Request, { params: { id } }: any) {
 }
 
 async function _delete(request: Request, { params: { id } }: any) {
-  return await membershipService._delete(id)
+  await membershipService._delete(id)
+  return { message: 'Membership deleted successfully' }
 }

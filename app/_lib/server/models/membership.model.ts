@@ -79,9 +79,9 @@ MembershipSchema.pre('findOneAndDelete', async function (next) {
   let membership = this.getQuery()['_id']
   let { owner, community } = this.getOptions()
 
-  let deletedMembership = membership._id || membership
-  let ownerId = membership.owner || owner?._id
-  let communityId = membership.community || community?._id
+  let deletedMembership = membership?._id || membership
+  let ownerId = membership?.owner || owner?._id
+  let communityId = membership?.community || community?._id
 
   await Person.updateOne(
     { _id: ownerId },

@@ -1,4 +1,4 @@
-import { apiHandler } from '@hyperlocal/server/api'
+import { ApiRequestError, apiHandler } from '@hyperlocal/server/api'
 import * as communitiesService from '@hyperlocal/services/communities.service'
 
 export async function GET(request: Request, { params: { id } }: any) {
@@ -20,9 +20,12 @@ const handler = apiHandler({
 })
 
 async function getById(request: Request, { params: { id } }: any) {
-  const community = await communitiesService.getById(id)
-  if (!community) throw new Error('Community not found')
-  return community
+  try {
+    const community = await communitiesService.getById(id)
+    return community
+  } catch (e) {
+    throw new ApiRequestError(e as string, 404)
+  }
 }
 
 async function update(request: Request, { params: { id } }: any) {
@@ -31,5 +34,6 @@ async function update(request: Request, { params: { id } }: any) {
 }
 
 async function _delete(request: Request, { params: { id } }: any) {
-  return await communitiesService._delete(id)
+  await communitiesService._delete(id)
+  return { message: 'Community deleted successfully' }
 }

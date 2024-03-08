@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { AdminLayout } from '@hyperlocal/_lib/client/components/layouts/AdminLayout'
+import { AdminLayout } from '@hyperlocal/ui/components/Layouts/AdminLayout'
 import { auth } from '@hyperlocal/server/auth'
 
 export const metadata: Metadata = {
