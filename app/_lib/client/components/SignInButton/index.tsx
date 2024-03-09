@@ -32,6 +32,7 @@ export function SignInButton({ signIn }: { signIn: () => void }) {
       console.log('ADDRESS THAT IS CONNECTED', address)
     }
     //fetchNonce()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, [])
 
   // If the user is not connected

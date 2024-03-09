@@ -62,6 +62,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isConnected) {
       checkAccount()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run once
   }, [])
 
   useEffect(() => {
